@@ -51,7 +51,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto">
             <Image
-              src={complaint.incidentPhotoUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image'}
+              src={complaint.incidentPhotoUrl}
               alt={`Incident involving ${complaint.licensePlate}`}
               data-ai-hint={complaint.incidentPhotoAiHint}
               fill
@@ -98,4 +98,6 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     </Dialog>
   );
 }
+    
+
     

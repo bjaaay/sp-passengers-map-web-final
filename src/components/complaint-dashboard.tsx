@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
@@ -31,12 +32,8 @@ interface UserData {
   office: 'PSO' | 'LTFRB';
 }
 
-function generatePlaceholderUrl(description: string, id: string): string {
-    if (description) {
-        const hint = description.split(' ').slice(0, 4).join(' ');
-        return `https://placehold.co/600x400/EEE/31343C?text=${encodeURIComponent(hint)}...`;
-    }
-    return `https://placehold.co/600x400/EEE/31343C?text=No+Image`;
+function generatePlaceholderUrl(id: string): string {
+    return `https://picsum.photos/seed/${id}/600/400`;
 }
 
 export function ComplaintDashboard() {
@@ -89,7 +86,7 @@ export function ComplaintDashboard() {
             // Map the database fields to the Complaint type
             const complaint: Complaint = {
               id: reportId,
-              incidentPhotoUrl: generatePlaceholderUrl(description, reportId),
+              incidentPhotoUrl: generatePlaceholderUrl(reportId),
               incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
               vehicleType: reportData.vehicle || 'Van', // Default vehicle type
               licensePlate: reportData.plate || 'No Plate',
@@ -324,4 +321,6 @@ export function ComplaintDashboard() {
     </div>
   );
 }
+    
+
     
