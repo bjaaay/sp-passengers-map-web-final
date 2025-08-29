@@ -34,12 +34,11 @@ export function PassengersMapLogo(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M14 4.5V10l-2 1-2-1V4.5" />
-      <path d="m10 4.5-5.42 2.71C4.23 7.42 4 7.91 4 8.44v9.06c0 .89 1.08 1.34 1.71.71L10 14" />
-      <path d="m14 4.5 5.42 2.71c.36.21.58.58.58.98v9.06c0 .89-1.08 1.34-1.71.71L14 14" />
-      <path d="M12 10v4" />
-      <path d="M10 14h4" />
-      <circle cx="12" cy="4.5" r="1.5" />
+      <path d="M20 10c0 4.4-8 12-8 12s-8-7.6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+      <path d="m2 7 10 5v10" />
+      <path d="m22 7-10 5v10" />
     </svg>
   );
 }
