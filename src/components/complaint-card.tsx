@@ -6,7 +6,7 @@ import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -42,14 +42,20 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
       complaint.status === 'Resolved' ? 'bg-green-50/50 dark:bg-green-950/50' : ''
     )}>
        <CardHeader className="p-4 cursor-pointer" onClick={onViewDetails}>
-        <div className="relative aspect-video w-full overflow-hidden rounded-md">
-           <Image
-            src={complaint.incidentPhotoUrl}
-            alt={`Incident involving ${complaint.licensePlate}`}
-            data-ai-hint={complaint.incidentPhotoAiHint}
-            fill
-            className="object-cover"
-          />
+        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+           {complaint.incidentPhotoUrl ? (
+            <Image
+              src={complaint.incidentPhotoUrl}
+              alt={`Incident involving ${complaint.licensePlate}`}
+              data-ai-hint={complaint.incidentPhotoAiHint}
+              fill
+              className="object-cover"
+            />
+           ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <ImageOff className="h-10 w-10 text-muted-foreground" />
+            </div>
+           )}
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4 pt-0 cursor-pointer" onClick={onViewDetails}>
