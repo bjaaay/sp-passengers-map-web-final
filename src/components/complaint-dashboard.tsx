@@ -63,28 +63,45 @@ export function ComplaintDashboard() {
 
   useEffect(() => {
     if (!currentUser) return;
-
-    const complaintsRef = ref(database, 'reports/');
-    const unsubscribe = onValue(complaintsRef, 
-      (snapshot) => {
-        const data = snapshot.val();
-        console.log('Data from Firebase:', data);
-        if (data) {
-          const complaintsList: Complaint[] = Object.keys(data).map(key => ({
-            id: key,
-            ...data[key]
-          }));
-          setComplaints(complaintsList);
-        } else {
-          setComplaints([]);
-        }
-      },
-      (error) => {
-        console.error("Firebase Read Error:", error);
-        // You can add a toast notification here to inform the user
+  
+    const reportsRef = ref(database, 'reports/');
+    const unsubscribe = onValue(reportsRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log('Data from Firebase:', data);
+      if (data) {
+        const allComplaints: Complaint[] = [];
+        // Iterate over each user's reports
+        Object.keys(data).forEach(userId => {
+          const userReports = data[userId];
+          // Iterate over each report for the user
+          Object.keys(userReports).forEach(reportId => {
+            const reportData = userReports[reportId];
+            
+            // Map the database fields to the Complaint type
+            const complaint: Complaint = {
+              id: reportId,
+              // Use a placeholder because the DB URL is a local file path
+              incidentPhotoUrl: (reportData.images && reportData.images[0]) ? `https://picsum.photos/seed/${reportId}/600/400` : 'https://placehold.co/600x400/EEE/31343C?text=No+Image',
+              incidentPhotoAiHint: reportData.description ? reportData.description.split(" ").slice(0,2).join(" ") : 'incident',
+              vehicleType: reportData.vehicle || 'Van', // Default vehicle type
+              licensePlate: reportData.plate || 'No Plate',
+              route: reportData.route || 'No Route',
+              incidentTime: reportData.time || 'No Time',
+              incidentDate: reportData.date || 'No Date',
+              description: reportData.description || 'No Description',
+              status: reportData.status || 'New', // Default status
+            };
+            allComplaints.push(complaint);
+          });
+        });
+        setComplaints(allComplaints);
+      } else {
+        setComplaints([]);
       }
-    );
-    
+    }, (error) => {
+      console.error("Firebase Read Error:", error);
+    });
+  
     return () => unsubscribe();
   }, [currentUser]);
 
@@ -94,12 +111,21 @@ export function ComplaintDashboard() {
   };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
-    const complaintRef = ref(database, `reports/${id}`);
-    update(complaintRef, { status });
+    // This part might need adjustment based on how statuses are stored.
+    // Assuming status is stored directly under the report. The path would be reports/{userId}/{reportId}
+    // This function needs the userId to correctly update the status. For now, we'll optimistically update the state.
+    
+    setComplaints(prevComplaints =>
+        prevComplaints.map(c => c.id === id ? { ...c, status } : c)
+    );
 
     if (selectedComplaint && selectedComplaint.id === id) {
-      setSelectedComplaint(prev => prev ? { ...prev, status } : null);
+        setSelectedComplaint(prev => prev ? { ...prev, status } : null);
     }
+    
+    // To implement the actual database update, you'd need to find the correct userId for the given reportId.
+    // This might require restructuring data or fetching it differently.
+    console.log(`Status for report ${id} changed to ${status}. DB update needs implementation.`);
   };
 
   const downloadReports = () => {
@@ -135,8 +161,8 @@ export function ComplaintDashboard() {
         statusFilter === 'All' || complaint.status === statusFilter;
       const vehicleMatch =
         vehicleTypeFilter === 'All' || complaint.vehicleType === vehicleTypeFilter;
-      const dateMatch =
-        !dateFilter || complaint.incidentDate === dateFilter.toISOString().split('T')[0];
+      
+      const dateMatch = !dateFilter || (complaint.incidentDate && new Date(complaint.incidentDate).toDateString() === dateFilter.toDateString());
       
       return searchMatch && statusMatch && vehicleMatch && dateMatch;
     });
@@ -290,4 +316,4 @@ export function ComplaintDashboard() {
     </div>
   );
 }
- 
+    

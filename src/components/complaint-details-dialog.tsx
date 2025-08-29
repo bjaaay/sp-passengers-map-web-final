@@ -2,7 +2,7 @@
 "use client";
 
 import Image from 'next/image';
-import { format, isValid } from 'date-fns';
+import { format, isValid, parse } from 'date-fns';
 import type { Complaint } from '@/lib/types';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -25,30 +25,22 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
   
   let formattedDate = "Date not available";
   if (complaint.incidentDate) {
-      const incidentDate = new Date(complaint.incidentDate);
+      // Assuming date format is "M/d/yyyy" from the database
+      const incidentDate = parse(complaint.incidentDate, "M/d/yyyy", new Date());
       if (isValid(incidentDate)) {
         formattedDate = format(incidentDate, "MMMM dd, yyyy");
       }
   }
 
   let formattedTime = "Time not available";
-  if (complaint.incidentTime && complaint.incidentTime.includes(':')) {
+  if (complaint.incidentTime) {
     try {
-      const [time, period] = complaint.incidentTime.split(' ');
-      const [hours, minutes] = time.split(':');
-      let parsedTime = `${parseInt(hours, 10) % 12 || 12}:${minutes}`;
-      if (parseInt(hours, 10) >= 12) {
-        parsedTime += ' PM'
-      } else {
-        parsedTime += ' AM'
-      }
-      formattedTime = parsedTime;
+      // Assuming time is a string like "4:59 PM"
+      formattedTime = complaint.incidentTime;
     } catch (e) {
-      // If time format is unexpected, we'll just use the fallback
       console.error("Error parsing time:", e);
     }
   }
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -103,4 +95,4 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     </Dialog>
   );
 }
-
+    
