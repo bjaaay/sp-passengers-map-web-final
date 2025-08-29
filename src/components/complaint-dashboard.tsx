@@ -86,7 +86,7 @@ export function ComplaintDashboard() {
             // Map the database fields to the Complaint type
             const complaint: Complaint = {
               id: reportId,
-              incidentPhotoUrl: generatePlaceholderUrl(reportId),
+              incidentPhotoUrl: (reportData.images && reportData.images[0]) ? generatePlaceholderUrl(reportId) : generatePlaceholderUrl(reportId),
               incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
               vehicleType: reportData.vehicle || 'Van', // Default vehicle type
               licensePlate: reportData.plate || 'No Plate',

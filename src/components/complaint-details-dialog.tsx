@@ -47,7 +47,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogTitle className="sr-only">Complaint Details</DialogTitle>
-        <DialogDescription className="sr-only">Detailed view of a single complaint report.</DialogDescription>
+        <DialogDescription className="sr-only">A dialog showing the details of a specific complaint, including the incident photo, vehicle information, and description.</DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto">
             <Image
