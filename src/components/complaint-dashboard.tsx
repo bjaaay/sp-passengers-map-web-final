@@ -86,15 +86,15 @@ export function ComplaintDashboard() {
             // Map the database fields to the Complaint type
             const complaint: Complaint = {
               id: reportId,
-              incidentPhotoUrl: (reportData.images && reportData.images[0]) ? generatePlaceholderUrl(reportId) : generatePlaceholderUrl(reportId),
+              incidentPhotoUrl: generatePlaceholderUrl(reportId), // Always use placeholder
               incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
-              vehicleType: reportData.vehicle || 'Van', // Default vehicle type
+              vehicleType: reportData.vehicle || 'Van',
               licensePlate: reportData.plate || 'No Plate',
               route: reportData.route || 'No Route',
               incidentTime: reportData.time || 'No Time',
               incidentDate: reportData.date || 'No Date',
               description: description,
-              status: reportData.status || 'New', // Default status
+              status: reportData.status || 'New',
             };
             allComplaints.push(complaint);
           });
@@ -321,6 +321,4 @@ export function ComplaintDashboard() {
     </div>
   );
 }
-    
-
     
