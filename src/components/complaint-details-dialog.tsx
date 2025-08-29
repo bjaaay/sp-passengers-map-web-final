@@ -108,5 +108,3 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     </Dialog>
   );
 }
-
-    

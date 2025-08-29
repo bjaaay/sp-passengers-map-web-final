@@ -106,5 +106,3 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
     </Card>
   );
 }
-
-    
