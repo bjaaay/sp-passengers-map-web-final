@@ -31,7 +31,7 @@ export function ComplaintDashboard() {
     setComplaints(prev => [report, ...prev]);
   };
 
-  const updateReportStatus = (id: string, status: 'Resolved' | 'Pending') => {
+  const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
     setComplaints(prev =>
       prev.map(c => (c.id === id ? { ...c, status } : c))
     );
@@ -113,7 +113,8 @@ export function ComplaintDashboard() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Statuses</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="New">New</SelectItem>
+                  <SelectItem value="Review">Review</SelectItem>
                   <SelectItem value="Resolved">Resolved</SelectItem>
                 </SelectContent>
               </Select>
@@ -123,10 +124,11 @@ export function ComplaintDashboard() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Vehicles</SelectItem>
-                  <SelectItem value="Car">Car</SelectItem>
-                  <SelectItem value="Bus">Bus</SelectItem>
-                  <SelectItem value="Truck">Truck</SelectItem>
-                  <SelectItem value="Motorcycle">Motorcycle</SelectItem>
+                  <SelectItem value="Jeepney">Jeepney</SelectItem>
+                  <SelectItem value="Tricycle">Tricycle</SelectItem>
+                  <SelectItem value="Trike">Trike</SelectItem>
+                  <SelectItem value="Modern PUV">Modern PUV</SelectItem>
+                  <SelectItem value="Van">Van</SelectItem>
                 </SelectContent>
               </Select>
                <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />

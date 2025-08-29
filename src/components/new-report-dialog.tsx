@@ -40,7 +40,7 @@ import { Loader2, Sparkles, AlertTriangle } from "lucide-react"
 
 const formSchema = z.object({
   incidentPhoto: z.any().refine(file => file?.length == 1, "Photo is required."),
-  vehicleType: z.enum(["Car", "Bus", "Truck", "Motorcycle"]),
+  vehicleType: z.enum(["Jeepney", "Tricycle", "Trike", "Modern PUV", "Van"]),
   licensePlate: z.string().min(3, "License plate must be at least 3 characters."),
   route: z.string().min(1, "Route is required."),
   incidentDate: z.date({ required_error: "Incident date is required." }),
@@ -146,7 +146,7 @@ export function NewReportDialog({ isOpen, onOpenChange, onAddReport }: NewReport
         incidentTime: values.incidentTime,
         incidentDate: values.incidentDate.toISOString().split("T")[0],
         description: values.description,
-        status: "Pending",
+        status: "New",
         complaintType: values.complaintType || "Other",
       };
 
@@ -208,10 +208,11 @@ export function NewReportDialog({ isOpen, onOpenChange, onAddReport }: NewReport
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Car">Car</SelectItem>
-                        <SelectItem value="Bus">Bus</SelectItem>
-                        <SelectItem value="Truck">Truck</SelectItem>
-                        <SelectItem value="Motorcycle">Motorcycle</SelectItem>
+                        <SelectItem value="Jeepney">Jeepney</SelectItem>
+                        <SelectItem value="Tricycle">Tricycle</SelectItem>
+                        <SelectItem value="Trike">Trike</SelectItem>
+                        <SelectItem value="Modern PUV">Modern PUV</SelectItem>
+                        <SelectItem value="Van">Van</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
