@@ -46,8 +46,6 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     }
   }
 
-  const hasValidImage = complaint.incidentPhotoUrl && complaint.incidentPhotoUrl.startsWith('http');
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0" onPointerDownOutside={(e) => e.preventDefault()}>
@@ -55,7 +53,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
         <DialogDescription className="sr-only">A dialog showing the details of a specific complaint, including the incident photo, vehicle information, and description.</DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto bg-muted">
-            {hasValidImage ? (
+            {complaint.incidentPhotoUrl ? (
               <Image
                 src={complaint.incidentPhotoUrl}
                 alt={`Incident involving ${complaint.licensePlate}`}
@@ -67,7 +65,6 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
               <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
                 <ImageOff className="h-12 w-12 text-muted-foreground" />
                 <p className="mt-2 text-sm text-muted-foreground">Original image is not available.</p>
-                <p className="text-xs text-muted-foreground/80">The image URL stored in the database is a local file path that cannot be accessed by the browser.</p>
               </div>
             )}
           </div>
@@ -110,4 +107,5 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     </Dialog>
   );
 }
+
     

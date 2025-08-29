@@ -32,19 +32,6 @@ interface UserData {
   office: 'PSO' | 'LTFRB';
 }
 
-function generatePlaceholderUrl(id: string): string {
-    return `https://picsum.photos/seed/${id}/600/400`;
-}
-
-function isValidHttpUrl(string: string) {
-    try {
-        const url = new URL(string);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch (_) {
-        return false;  
-    }
-}
-
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
@@ -95,7 +82,7 @@ export function ComplaintDashboard() {
               
               const complaint: Complaint = {
                 id: reportId,
-                incidentPhotoUrl: isValidHttpUrl(imageUrl) ? imageUrl : generatePlaceholderUrl(reportId), 
+                incidentPhotoUrl: imageUrl,
                 vehicleType: reportData.vehicle || 'Van',
                 licensePlate: reportData.plate || 'No Plate',
                 route: reportData.route || 'No Route',
@@ -330,4 +317,6 @@ export function ComplaintDashboard() {
     </div>
   );
 }
+    
+
     
