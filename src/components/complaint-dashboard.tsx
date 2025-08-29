@@ -33,6 +33,8 @@ interface UserData {
 }
 
 function generatePlaceholderUrl(id: string): string {
+    // Use a reliable placeholder service that returns non-SVG images.
+    // Seeding with the ID ensures a consistent image for each complaint.
     return `https://picsum.photos/seed/${id}/600/400`;
 }
 
@@ -72,32 +74,35 @@ export function ComplaintDashboard() {
     const reportsRef = ref(database, 'reports/');
     const unsubscribe = onValue(reportsRef, (snapshot) => {
       const data = snapshot.val();
-      console.log('Data from Firebase:', data);
       if (data) {
         const allComplaints: Complaint[] = [];
         // Iterate over each user's reports
         Object.keys(data).forEach(userId => {
           const userReports = data[userId];
-          // Iterate over each report for the user
-          Object.keys(userReports).forEach(reportId => {
-            const reportData = userReports[reportId];
-            const description = reportData.description || 'No Description';
-            
-            // Map the database fields to the Complaint type
-            const complaint: Complaint = {
-              id: reportId,
-              incidentPhotoUrl: generatePlaceholderUrl(reportId), // Always use placeholder
-              incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
-              vehicleType: reportData.vehicle || 'Van',
-              licensePlate: reportData.plate || 'No Plate',
-              route: reportData.route || 'No Route',
-              incidentTime: reportData.time || 'No Time',
-              incidentDate: reportData.date || 'No Date',
-              description: description,
-              status: reportData.status || 'New',
-            };
-            allComplaints.push(complaint);
-          });
+          if (userReports) {
+            // Iterate over each report for the user
+            Object.keys(userReports).forEach(reportId => {
+              const reportData = userReports[reportId];
+              const description = reportData.description || 'No Description';
+              
+              // Map the database fields to the Complaint type
+              const complaint: Complaint = {
+                id: reportId,
+                // The URL from the DB is a local file path (file://) which is not accessible by the browser.
+                // We generate a consistent placeholder URL based on the report's unique ID.
+                incidentPhotoUrl: generatePlaceholderUrl(reportId), 
+                incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
+                vehicleType: reportData.vehicle || 'Van',
+                licensePlate: reportData.plate || 'No Plate',
+                route: reportData.route || 'No Route',
+                incidentTime: reportData.time || 'No Time',
+                incidentDate: reportData.date || 'No Date',
+                description: description,
+                status: reportData.status || 'New',
+              };
+              allComplaints.push(complaint);
+            });
+          }
         });
         setComplaints(allComplaints);
       } else {
