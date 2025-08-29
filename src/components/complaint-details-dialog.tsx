@@ -2,7 +2,7 @@
 "use client";
 
 import Image from 'next/image';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import type { Complaint } from '@/lib/types';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -23,17 +23,32 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     onOpenChange(false);
   };
   
-  const incidentDate = new Date(complaint.incidentDate);
-  const formattedDate = format(incidentDate, "MMMM dd, yyyy");
-
-  const [time, period] = complaint.incidentTime.split(' ');
-  const [hours, minutes] = time.split(':');
-  let formattedTime = `${parseInt(hours, 10) % 12 || 12}:${minutes}`;
-  if (parseInt(hours, 10) >= 12) {
-      formattedTime += ' PM'
-  } else {
-      formattedTime += ' AM'
+  let formattedDate = "Date not available";
+  if (complaint.incidentDate) {
+      const incidentDate = new Date(complaint.incidentDate);
+      if (isValid(incidentDate)) {
+        formattedDate = format(incidentDate, "MMMM dd, yyyy");
+      }
   }
+
+  let formattedTime = "Time not available";
+  if (complaint.incidentTime && complaint.incidentTime.includes(':')) {
+    try {
+      const [time, period] = complaint.incidentTime.split(' ');
+      const [hours, minutes] = time.split(':');
+      let parsedTime = `${parseInt(hours, 10) % 12 || 12}:${minutes}`;
+      if (parseInt(hours, 10) >= 12) {
+        parsedTime += ' PM'
+      } else {
+        parsedTime += ' AM'
+      }
+      formattedTime = parsedTime;
+    } catch (e) {
+      // If time format is unexpected, we'll just use the fallback
+      console.error("Error parsing time:", e);
+    }
+  }
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -42,7 +57,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto">
             <Image
-              src={complaint.incidentPhotoUrl}
+              src={complaint.incidentPhotoUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image'}
               alt={`Incident involving ${complaint.licensePlate}`}
               data-ai-hint={complaint.incidentPhotoAiHint}
               fill
@@ -52,7 +67,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
           <div className="flex flex-col bg-secondary/50">
             <div className="p-6 pb-2 space-y-3 flex-grow">
                <h2 className="text-2xl font-bold">{complaint.vehicleType} {complaint.licensePlate}</h2>
-               <p className="text-muted-foreground font-medium">{complaint.route}</p>
+               <p className="text-muted-foreground font-medium">{complaint.route || "Route not specified"}</p>
                <p className="text-sm text-muted-foreground">{formattedTime}, {formattedDate}</p>
 
                 <div className="mt-4 p-4 bg-background/70 rounded-md max-h-60 overflow-y-auto">
@@ -88,3 +103,4 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     </Dialog>
   );
 }
+
