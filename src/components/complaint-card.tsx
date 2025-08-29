@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from 'next/image';
@@ -5,7 +6,7 @@ import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck, MessageSquareText } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -27,10 +28,12 @@ const statusConfig = {
     New: { icon: <AlertCircle className="mr-1.5 h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', borderColor: 'border-yellow-200 dark:border-yellow-800' },
     Review: { icon: <Eye className="mr-1.5 h-4 w-4" />, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', borderColor: 'border-blue-200 dark:border-blue-800' },
     Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', borderColor: 'border-green-200 dark:border-green-800' },
+    Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300', borderColor: 'border-gray-200 dark:border-gray-800' },
 }
 
 export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: ComplaintCardProps) {
-  const currentStatusConfig = statusConfig[complaint.status];
+  const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
+  const statusLabel = complaint.status || 'Unknown';
 
   return (
     <Card className={cn(
@@ -57,7 +60,7 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
             currentStatusConfig.color
           )}>
             {currentStatusConfig.icon}
-            {complaint.status}
+            {statusLabel}
           </Badge>
         </div>
         <div className="space-y-2 text-sm text-muted-foreground">
