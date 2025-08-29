@@ -15,13 +15,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PassengersMapLogo } from './icons';
-import { Download, Search, UserCircle, LogOut, Settings, PlusCircle } from 'lucide-react';
+import { Download, Search, UserCircle, LogOut, Settings, PlusCircle, UserCog } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { NewReportDialog } from './new-report-dialog';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+
+type UserRole = 'PSO' | 'LTFRB';
 
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>(complaintsData);
@@ -31,6 +35,7 @@ export function ComplaintDashboard() {
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [isNewReportOpen, setIsNewReportOpen] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>('PSO');
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
     setComplaints(prev =>
@@ -116,7 +121,7 @@ export function ComplaintDashboard() {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">John Doe</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        johndoe@example.com
+                        {userRole === 'PSO' ? 'Public Safety Office' : 'LTFRB Office'}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -125,12 +130,14 @@ export function ComplaintDashboard() {
                     <UserCircle className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                    <Link href="/register-vehicle">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      <span>Register Vehicle</span>
-                    </Link>
-                  </DropdownMenuItem>
+                   {userRole === 'LTFRB' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/register-vehicle">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        <span>Register Vehicle</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
@@ -183,6 +190,18 @@ export function ComplaintDashboard() {
               </Select>
                <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
             </div>
+          </div>
+          <div className="pb-4 flex items-center space-x-2">
+            <UserCog className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="role-switcher" className="text-sm font-medium text-muted-foreground">
+              Simulate Role:
+            </Label>
+            <span className="text-sm font-semibold">{userRole}</span>
+            <Switch
+              id="role-switcher"
+              checked={userRole === 'LTFRB'}
+              onCheckedChange={(checked) => setUserRole(checked ? 'LTFRB' : 'PSO')}
+            />
           </div>
         </div>
       </header>
