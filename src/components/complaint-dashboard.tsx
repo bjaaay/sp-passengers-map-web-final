@@ -5,6 +5,7 @@ import type { Complaint } from '@/lib/types';
 import { complaintsData } from '@/lib/data';
 import { ComplaintCard } from './complaint-card';
 import { NewReportDialog } from './new-report-dialog';
+import { ComplaintDetailsDialog } from './complaint-details-dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +23,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>(complaintsData);
   const [isNewReportOpen, setIsNewReportOpen] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
@@ -35,6 +37,9 @@ export function ComplaintDashboard() {
     setComplaints(prev =>
       prev.map(c => (c.id === id ? { ...c, status } : c))
     );
+    if (selectedComplaint && selectedComplaint.id === id) {
+      setSelectedComplaint(prev => prev ? { ...prev, status } : null);
+    }
   };
 
   const downloadReports = () => {
@@ -148,6 +153,7 @@ export function ComplaintDashboard() {
                 <ComplaintCard
                   complaint={complaint}
                   onStatusChange={updateReportStatus}
+                  onViewDetails={() => setSelectedComplaint(complaint)}
                 />
               </motion.div>
             ))}
@@ -166,6 +172,19 @@ export function ComplaintDashboard() {
         onOpenChange={setIsNewReportOpen}
         onAddReport={addReport}
       />
+      
+      {selectedComplaint && (
+        <ComplaintDetailsDialog
+          complaint={selectedComplaint}
+          isOpen={!!selectedComplaint}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              setSelectedComplaint(null);
+            }
+          }}
+          onStatusChange={updateReportStatus}
+        />
+      )}
     </div>
   );
 }

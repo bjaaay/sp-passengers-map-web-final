@@ -5,13 +5,14 @@ import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck, MessageSquareText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface ComplaintCardProps {
   complaint: Complaint;
   onStatusChange: (id: string, status: 'New' | 'Review' | 'Resolved') => void;
+  onViewDetails: () => void;
 }
 
 const vehicleIcons: Record<Complaint['vehicleType'], React.ReactNode> = {
@@ -28,16 +29,16 @@ const statusConfig = {
     Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', borderColor: 'border-green-200 dark:border-green-800' },
 }
 
-export function ComplaintCard({ complaint, onStatusChange }: ComplaintCardProps) {
+export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: ComplaintCardProps) {
   const currentStatusConfig = statusConfig[complaint.status];
 
   return (
     <Card className={cn(
-      "flex flex-col transition-all duration-300 ease-in-out",
+      "flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1",
       currentStatusConfig.borderColor,
       complaint.status === 'Resolved' ? 'bg-green-50/50 dark:bg-green-950/50' : ''
     )}>
-      <CardHeader className="p-4">
+       <CardHeader className="p-4 cursor-pointer" onClick={onViewDetails}>
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
            <Image
             src={complaint.incidentPhotoUrl}
@@ -48,7 +49,7 @@ export function ComplaintCard({ complaint, onStatusChange }: ComplaintCardProps)
           />
         </div>
       </CardHeader>
-      <CardContent className="flex-grow p-4 pt-0">
+      <CardContent className="flex-grow p-4 pt-0 cursor-pointer" onClick={onViewDetails}>
         <div className="mb-2 flex items-center justify-between">
           <CardTitle className="text-lg font-semibold leading-none tracking-tight">{complaint.licensePlate}</CardTitle>
           <Badge variant={'outline'} className={cn(
@@ -67,10 +68,14 @@ export function ComplaintCard({ complaint, onStatusChange }: ComplaintCardProps)
           <p className="line-clamp-2">{complaint.description}</p>
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-2">
+        <Button variant="outline" size="sm" onClick={onViewDetails}>
+          <MessageSquareText className="mr-2 h-4 w-4" />
+          Details
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button variant="outline" size="sm">
               Change Status
             </Button>
           </DropdownMenuTrigger>
