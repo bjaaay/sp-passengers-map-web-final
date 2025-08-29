@@ -20,10 +20,16 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { database } from '@/lib/firebase';
+import { database, auth } from '@/lib/firebase';
 import { ref, onValue, update } from 'firebase/database';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
-type UserRole = 'PSO' | 'LTFRB';
+interface UserData {
+  firstName: string;
+  lastName: string;
+  office: 'PSO' | 'LTFRB';
+}
 
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -32,9 +38,32 @@ export function ComplaintDashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
-  const [userRole, setUserRole] = useState<UserRole>('PSO');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const router = useRouter();
+
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        const userRef = ref(database, `users/${user.uid}`);
+        onValue(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            setUserData(snapshot.val());
+          }
+        });
+      } else {
+        router.push('/');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
     const complaintsRef = ref(database, 'complaints/');
     onValue(complaintsRef, (snapshot) => {
       const data = snapshot.val();
@@ -48,7 +77,12 @@ export function ComplaintDashboard() {
         setComplaints([]);
       }
     });
-  }, []);
+  }, [currentUser]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
     const complaintRef = ref(database, `complaints/${id}`);
@@ -99,6 +133,14 @@ export function ComplaintDashboard() {
     });
   }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, dateFilter]);
 
+  if (!currentUser || !userData) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
@@ -117,17 +159,17 @@ export function ComplaintDashboard() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="@user" />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarImage src={`https://i.pravatar.cc/150?u=${currentUser.uid}`} alt="@user" />
+                      <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">John Doe</p>
+                      <p className="text-sm font-medium leading-none">{userData.firstName} {userData.lastName}</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {userRole === 'PSO' ? 'Public Safety Office' : 'LTFRB Office'}
+                        {userData.office === 'PSO' ? 'Public Safety Office' : 'LTFRB Office'}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -136,7 +178,7 @@ export function ComplaintDashboard() {
                     <UserCircle className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                   {userRole === 'LTFRB' && (
+                   {userData.office === 'LTFRB' && (
                     <DropdownMenuItem asChild>
                       <Link href="/register-vehicle">
                         <PlusCircle className="mr-2 h-4 w-4" />
@@ -149,11 +191,9 @@ export function ComplaintDashboard() {
                     <span>Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </Link>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
