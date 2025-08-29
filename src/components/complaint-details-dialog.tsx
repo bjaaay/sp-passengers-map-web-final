@@ -1,9 +1,10 @@
+
 "use client";
 
 import Image from 'next/image';
 import { format } from 'date-fns';
 import type { Complaint } from '@/lib/types';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogTitle className="sr-only">Complaint Details</DialogTitle>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto">
             <Image
