@@ -1,3 +1,9 @@
+import { ComplaintDashboard } from '@/components/complaint-dashboard';
+
 export default function Home() {
-  return <></>;
+  return (
+    <main className="min-h-screen bg-background">
+      <ComplaintDashboard />
+    </main>
+  );
 }
