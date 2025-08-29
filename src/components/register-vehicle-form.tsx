@@ -38,12 +38,12 @@ export function RegisterVehicleForm() {
           <form className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="gps-tracker-id">GPS Tracker ID</Label>
-              <Input id="gps-tracker-id" placeholder="Enter GPS Tracker ID" />
+              <Input id="gps-tracker-id" name="gps-tracker-id" placeholder="Enter GPS Tracker ID" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="vehicle-type">Vehicle Type</Label>
-              <Select>
+              <Select name="vehicle-type">
                 <SelectTrigger id="vehicle-type">
                   <SelectValue placeholder="Select Vehicle Type" />
                 </SelectTrigger>
@@ -59,7 +59,7 @@ export function RegisterVehicleForm() {
 
             <div className="space-y-2">
               <Label htmlFor="plate-number">Vehicle Plate No.</Label>
-              <Input id="plate-number" placeholder="Enter Vehicle Plate No." />
+              <Input id="plate-number" name="plate-number" placeholder="Enter Vehicle Plate No." />
             </div>
 
             <div className="grid grid-cols-2 gap-4">

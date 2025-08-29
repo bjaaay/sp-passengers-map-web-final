@@ -131,7 +131,7 @@ export function SignUpForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>First Name</FormLabel>
-                        <FormControl><Input placeholder="First Name" {...field} /></FormControl>
+                        <FormControl><Input placeholder="First Name" {...field} autoComplete="given-name" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -142,7 +142,7 @@ export function SignUpForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Last Name</FormLabel>
-                        <FormControl><Input placeholder="Last Name" {...field} /></FormControl>
+                        <FormControl><Input placeholder="Last Name" {...field} autoComplete="family-name" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -154,7 +154,7 @@ export function SignUpForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Username</FormLabel>
-                        <FormControl><Input placeholder="Username" {...field} /></FormControl>
+                        <FormControl><Input placeholder="Username" {...field} autoComplete="username" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -165,7 +165,7 @@ export function SignUpForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
-                        <FormControl><Input placeholder="Email" {...field} /></FormControl>
+                        <FormControl><Input placeholder="Email" {...field} autoComplete="email" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -178,7 +178,7 @@ export function SignUpForm() {
                       <FormLabel>Password</FormLabel>
                       <div className="relative">
                         <FormControl>
-                          <Input type={showPassword ? "text" : "password"} placeholder="Password" {...field} />
+                          <Input type={showPassword ? "text" : "password"} placeholder="Password" {...field} autoComplete="new-password" />
                         </FormControl>
                         <Button
                           type="button"
@@ -202,7 +202,7 @@ export function SignUpForm() {
                       <FormLabel>Confirm Password</FormLabel>
                       <div className="relative">
                         <FormControl>
-                          <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" {...field} />
+                          <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" {...field} autoComplete="new-password" />
                         </FormControl>
                         <Button
                           type="button"
