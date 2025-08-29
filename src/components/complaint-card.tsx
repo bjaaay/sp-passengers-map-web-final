@@ -35,6 +35,7 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
   const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
+  const hasValidImage = complaint.incidentPhotoUrl && complaint.incidentPhotoUrl.startsWith('http');
 
 
   return (
@@ -45,11 +46,10 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
     )}>
        <CardHeader className="p-4 cursor-pointer" onClick={onViewDetails}>
         <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
-           {complaint.incidentPhotoUrl ? (
+           {hasValidImage ? (
             <Image
               src={complaint.incidentPhotoUrl}
               alt={`Incident involving ${complaint.licensePlate}`}
-              data-ai-hint={complaint.incidentPhotoAiHint}
               fill
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"
               className="object-cover"

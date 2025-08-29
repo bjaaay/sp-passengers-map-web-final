@@ -33,9 +33,16 @@ interface UserData {
 }
 
 function generatePlaceholderUrl(id: string): string {
-    // Use a reliable placeholder service that returns non-SVG images.
-    // Seeding with the ID ensures a consistent image for each complaint.
     return `https://picsum.photos/seed/${id}/600/400`;
+}
+
+function isValidHttpUrl(string: string) {
+    try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+        return false;  
+    }
 }
 
 export function ComplaintDashboard() {
@@ -83,21 +90,18 @@ export function ComplaintDashboard() {
             // Iterate over each report for the user
             Object.keys(userReports).forEach(reportId => {
               const reportData = userReports[reportId];
-              const description = reportData.description || 'No Description';
               
-              // Map the database fields to the Complaint type
+              const imageUrl = reportData.images && reportData.images[0] ? reportData.images[0] : '';
+              
               const complaint: Complaint = {
                 id: reportId,
-                // The URL from the DB is a local file path (file://) which is not accessible by the browser.
-                // We generate a consistent placeholder URL based on the report's unique ID.
-                incidentPhotoUrl: generatePlaceholderUrl(reportId), 
-                incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
+                incidentPhotoUrl: isValidHttpUrl(imageUrl) ? imageUrl : generatePlaceholderUrl(reportId), 
                 vehicleType: reportData.vehicle || 'Van',
                 licensePlate: reportData.plate || 'No Plate',
                 route: reportData.route || 'No Route',
                 incidentTime: reportData.time || 'No Time',
                 incidentDate: reportData.date || 'No Date',
-                description: description,
+                description: reportData.description || 'No Description',
                 status: reportData.status || 'New',
               };
               allComplaints.push(complaint);

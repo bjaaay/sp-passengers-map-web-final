@@ -6,7 +6,7 @@ import { format, isValid, parse } from 'date-fns';
 import type { Complaint } from '@/lib/types';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, X } from 'lucide-react';
+import { CheckCircle2, X, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ComplaintDetailsDialogProps {
@@ -46,21 +46,30 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     }
   }
 
+  const hasValidImage = complaint.incidentPhotoUrl && complaint.incidentPhotoUrl.startsWith('http');
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogTitle className="sr-only">Complaint Details</DialogTitle>
         <DialogDescription className="sr-only">A dialog showing the details of a specific complaint, including the incident photo, vehicle information, and description.</DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="relative h-64 md:h-auto">
-            <Image
-              src={complaint.incidentPhotoUrl}
-              alt={`Incident involving ${complaint.licensePlate}`}
-              data-ai-hint={complaint.incidentPhotoAiHint}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover rounded-l-lg"
-            />
+          <div className="relative h-64 md:h-auto bg-muted">
+            {hasValidImage ? (
+              <Image
+                src={complaint.incidentPhotoUrl}
+                alt={`Incident involving ${complaint.licensePlate}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover rounded-l-lg"
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
+                <ImageOff className="h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">Original image is not available.</p>
+                <p className="text-xs text-muted-foreground/80">The image URL stored in the database is a local file path that cannot be accessed by the browser.</p>
+              </div>
+            )}
           </div>
           <div className="flex flex-col bg-secondary/50">
             <div className="p-6 pb-2 space-y-3 flex-grow">
