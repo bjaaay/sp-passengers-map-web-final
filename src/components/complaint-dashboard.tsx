@@ -15,12 +15,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PassengersMapLogo } from './icons';
-import { Download, Search, UserCircle, LogOut, Settings } from 'lucide-react';
+import { Download, Search, UserCircle, LogOut, Settings, PlusCircle } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { NewReportDialog } from './new-report-dialog';
 
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>(complaintsData);
@@ -29,6 +30,7 @@ export function ComplaintDashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+  const [isNewReportOpen, setIsNewReportOpen] = useState(false);
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
     setComplaints(prev =>
@@ -37,6 +39,10 @@ export function ComplaintDashboard() {
     if (selectedComplaint && selectedComplaint.id === id) {
       setSelectedComplaint(prev => prev ? { ...prev, status } : null);
     }
+  };
+  
+  const handleAddReport = (report: Complaint) => {
+    setComplaints(prev => [report, ...prev]);
   };
 
   const downloadReports = () => {
@@ -88,6 +94,10 @@ export function ComplaintDashboard() {
               <h1 className="text-2xl font-bold tracking-tight">Passengers Map</h1>
             </div>
             <div className="flex items-center gap-4">
+               <Button onClick={() => setIsNewReportOpen(true)} size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Report
+              </Button>
                <Button onClick={downloadReports} variant="outline" size="sm">
                 <Download className="mr-2 h-4 w-4" />
                 Download
@@ -114,6 +124,12 @@ export function ComplaintDashboard() {
                   <DropdownMenuItem>
                     <UserCircle className="mr-2 h-4 w-4" />
                     <span>Profile</span>
+                  </DropdownMenuItem>
+                   <DropdownMenuItem asChild>
+                    <Link href="/register-vehicle">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      <span>Register Vehicle</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Settings className="mr-2 h-4 w-4" />
@@ -208,6 +224,12 @@ export function ComplaintDashboard() {
           onStatusChange={updateReportStatus}
         />
       )}
+      
+      <NewReportDialog
+        isOpen={isNewReportOpen}
+        onOpenChange={setIsNewReportOpen}
+        onAddReport={handleAddReport}
+      />
     </div>
   );
 }
