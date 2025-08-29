@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Complaint } from '@/lib/types';
-import { complaintsData } from '@/lib/data';
 import { ComplaintCard } from './complaint-card';
 import { ComplaintDetailsDialog } from './complaint-details-dialog';
 import { Input } from '@/components/ui/input';
@@ -21,11 +20,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { database } from '@/lib/firebase';
+import { ref, onValue, update } from 'firebase/database';
 
 type UserRole = 'PSO' | 'LTFRB';
 
 export function ComplaintDashboard() {
-  const [complaints, setComplaints] = useState<Complaint[]>(complaintsData);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -33,17 +34,34 @@ export function ComplaintDashboard() {
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [userRole, setUserRole] = useState<UserRole>('PSO');
 
+  useEffect(() => {
+    const complaintsRef = ref(database, 'complaints/');
+    onValue(complaintsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const complaintsList = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        }));
+        setComplaints(complaintsList);
+      } else {
+        setComplaints([]);
+      }
+    });
+  }, []);
+
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
-    setComplaints(prev =>
-      prev.map(c => (c.id === id ? { ...c, status } : c))
-    );
+    const complaintRef = ref(database, `complaints/${id}`);
+    update(complaintRef, { status });
+
     if (selectedComplaint && selectedComplaint.id === id) {
       setSelectedComplaint(prev => prev ? { ...prev, status } : null);
     }
   };
 
   const downloadReports = () => {
-    const headers = Object.keys(complaints[0]).join(',');
+    if (filteredComplaints.length === 0) return;
+    const headers = Object.keys(filteredComplaints[0]).join(',');
     const csv = [
       headers,
       ...filteredComplaints.map(row =>
