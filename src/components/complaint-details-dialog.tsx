@@ -25,11 +25,12 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
   
   let formattedDate = "Date not available";
   if (complaint.incidentDate) {
-      // Assuming date format is "M/d/yyyy" from the database
-      const incidentDate = parse(complaint.incidentDate, "M/d/yyyy", new Date());
-      if (isValid(incidentDate)) {
+    // Attempt to parse multiple common formats, though DB seems to be "M/d/yyyy" or "yyyy-MM-dd"
+    const parsedDate = parse(complaint.incidentDate, "M/d/yyyy", new Date());
+    const incidentDate = isValid(parsedDate) ? parsedDate : parse(complaint.incidentDate, "yyyy-MM-dd", new Date());
+    if (isValid(incidentDate)) {
         formattedDate = format(incidentDate, "MMMM dd, yyyy");
-      }
+    }
   }
 
   let formattedTime = "Time not available";

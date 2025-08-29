@@ -31,6 +31,14 @@ interface UserData {
   office: 'PSO' | 'LTFRB';
 }
 
+function generatePlaceholderUrl(description: string, id: string): string {
+    if (description) {
+        const hint = description.split(' ').slice(0, 4).join(' ');
+        return `https://placehold.co/600x400/EEE/31343C?text=${encodeURIComponent(hint)}...`;
+    }
+    return `https://placehold.co/600x400/EEE/31343C?text=No+Image`;
+}
+
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
@@ -76,19 +84,19 @@ export function ComplaintDashboard() {
           // Iterate over each report for the user
           Object.keys(userReports).forEach(reportId => {
             const reportData = userReports[reportId];
+            const description = reportData.description || 'No Description';
             
             // Map the database fields to the Complaint type
             const complaint: Complaint = {
               id: reportId,
-              // Use a placeholder because the DB URL is a local file path
-              incidentPhotoUrl: (reportData.images && reportData.images[0]) ? `https://picsum.photos/seed/${reportId}/600/400` : 'https://placehold.co/600x400/EEE/31343C?text=No+Image',
-              incidentPhotoAiHint: reportData.description ? reportData.description.split(" ").slice(0,2).join(" ") : 'incident',
+              incidentPhotoUrl: generatePlaceholderUrl(description, reportId),
+              incidentPhotoAiHint: description ? description.split(" ").slice(0,2).join(" ") : 'incident',
               vehicleType: reportData.vehicle || 'Van', // Default vehicle type
               licensePlate: reportData.plate || 'No Plate',
               route: reportData.route || 'No Route',
               incidentTime: reportData.time || 'No Time',
               incidentDate: reportData.date || 'No Date',
-              description: reportData.description || 'No Description',
+              description: description,
               status: reportData.status || 'New', // Default status
             };
             allComplaints.push(complaint);
