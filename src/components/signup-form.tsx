@@ -44,9 +44,8 @@ export function SignUpForm() {
                       <SelectValue placeholder="Select Office" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="main">Main Office</SelectItem>
-                      <SelectItem value="branch-a">Branch A</SelectItem>
-                      <SelectItem value="branch-b">Branch B</SelectItem>
+                      <SelectItem value="pso">Public Safety Office (PSO)</SelectItem>
+                      <SelectItem value="ltfrb">Land Transportation Franchising and Regulatory Board (LTFRB)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
