@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import type { Complaint } from '@/lib/types';
 import { complaintsData } from '@/lib/data';
 import { ComplaintCard } from './complaint-card';
-import { NewReportDialog } from './new-report-dialog';
 import { ComplaintDetailsDialog } from './complaint-details-dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,22 +15,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PassengersMapLogo } from './icons';
-import { Download, PlusCircle, Search } from 'lucide-react';
+import { Download, Search, UserCircle, LogOut, Settings } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { AnimatePresence, motion } from 'framer-motion';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 export function ComplaintDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>(complaintsData);
-  const [isNewReportOpen, setIsNewReportOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
-
-  const addReport = (report: Complaint) => {
-    setComplaints(prev => [report, ...prev]);
-  };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
     setComplaints(prev =>
@@ -90,15 +87,47 @@ export function ComplaintDashboard() {
               <PassengersMapLogo className="h-7 w-7 text-primary" />
               <h1 className="text-2xl font-bold tracking-tight">Passengers Map</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
                <Button onClick={downloadReports} variant="outline" size="sm">
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
-              <Button onClick={() => setIsNewReportOpen(true)} size="sm">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                New Report
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="@user" />
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">John Doe</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        johndoe@example.com
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           <div className="py-4 flex flex-col sm:flex-row gap-2">
@@ -166,12 +195,6 @@ export function ComplaintDashboard() {
           </div>
         )}
       </main>
-
-      <NewReportDialog
-        isOpen={isNewReportOpen}
-        onOpenChange={setIsNewReportOpen}
-        onAddReport={addReport}
-      />
       
       {selectedComplaint && (
         <ComplaintDetailsDialog
