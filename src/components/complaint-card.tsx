@@ -16,7 +16,7 @@ interface ComplaintCardProps {
   onViewDetails: () => void;
 }
 
-const vehicleIcons: Record<Complaint['vehicleType'], React.ReactNode> = {
+const vehicleIcons: Record<string, React.ReactNode> = {
   Jeepney: <Car className="h-5 w-5" />,
   Tricycle: <Bike className="h-5 w-5" />,
   Trike: <Bike className="h-5 w-5" />,
@@ -24,7 +24,7 @@ const vehicleIcons: Record<Complaint['vehicleType'], React.ReactNode> = {
   Van: <Truck className="h-5 w-5" />,
 };
 
-const statusConfig = {
+const statusConfig: Record<string, { icon: React.ReactNode; color: string; borderColor: string; }> = {
     New: { icon: <AlertCircle className="mr-1.5 h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', borderColor: 'border-yellow-200 dark:border-yellow-800' },
     Review: { icon: <Eye className="mr-1.5 h-4 w-4" />, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', borderColor: 'border-blue-200 dark:border-blue-800' },
     Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', borderColor: 'border-green-200 dark:border-green-800' },
@@ -34,6 +34,8 @@ const statusConfig = {
 export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: ComplaintCardProps) {
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
+  const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
+
 
   return (
     <Card className={cn(
@@ -71,7 +73,7 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
         </div>
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            {vehicleIcons[complaint.vehicleType] || <ShieldQuestion className="h-5 w-5" />}
+            {vehicleIcon}
             <span>{complaint.vehicleType}</span>
           </div>
           <p className="line-clamp-2">{complaint.description}</p>
