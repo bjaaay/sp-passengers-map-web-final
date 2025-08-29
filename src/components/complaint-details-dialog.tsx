@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import { format, isValid, parse } from 'date-fns';
 import type { Complaint } from '@/lib/types';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -47,6 +47,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogTitle className="sr-only">Complaint Details</DialogTitle>
+        <DialogDescription className="sr-only">Detailed view of a single complaint report.</DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto">
             <Image
@@ -54,6 +55,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
               alt={`Incident involving ${complaint.licensePlate}`}
               data-ai-hint={complaint.incidentPhotoAiHint}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover rounded-l-lg"
             />
           </div>

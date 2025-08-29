@@ -6,7 +6,7 @@ import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, ShieldQuestion, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle, ImageOff } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -51,6 +51,7 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
               alt={`Incident involving ${complaint.licensePlate}`}
               data-ai-hint={complaint.incidentPhotoAiHint}
               fill
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"
               className="object-cover"
             />
            ) : (
