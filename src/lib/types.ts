@@ -9,5 +9,5 @@ export type Complaint = {
   incidentDate: string;
   description: string;
   status: 'New' | 'Review' | 'Resolved';
-  complaintType: string;
 };
+ 

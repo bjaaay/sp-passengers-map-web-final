@@ -64,7 +64,7 @@ export function ComplaintDashboard() {
   useEffect(() => {
     if (!currentUser) return;
 
-    const complaintsRef = ref(database, 'complaints/');
+    const complaintsRef = ref(database, 'reports/');
     const unsubscribe = onValue(complaintsRef, 
       (snapshot) => {
         const data = snapshot.val();
@@ -94,7 +94,7 @@ export function ComplaintDashboard() {
   };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
-    const complaintRef = ref(database, `complaints/${id}`);
+    const complaintRef = ref(database, `reports/${id}`);
     update(complaintRef, { status });
 
     if (selectedComplaint && selectedComplaint.id === id) {
@@ -290,3 +290,4 @@ export function ComplaintDashboard() {
     </div>
   );
 }
+ 
