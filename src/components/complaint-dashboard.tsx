@@ -65,10 +65,11 @@ export function ComplaintDashboard() {
     if (!currentUser) return;
 
     const complaintsRef = ref(database, 'complaints/');
-    onValue(complaintsRef, (snapshot) => {
+    const unsubscribe = onValue(complaintsRef, (snapshot) => {
       const data = snapshot.val();
+      console.log('Data from Firebase:', data);
       if (data) {
-        const complaintsList = Object.keys(data).map(key => ({
+        const complaintsList: Complaint[] = Object.keys(data).map(key => ({
           id: key,
           ...data[key]
         }));
@@ -77,6 +78,8 @@ export function ComplaintDashboard() {
         setComplaints([]);
       }
     });
+    
+    return () => unsubscribe();
   }, [currentUser]);
 
   const handleLogout = async () => {
