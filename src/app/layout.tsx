@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Complaint Central',
-  description: 'Manage and resolve complaints efficiently.',
+  title: 'Passengers Map',
+  description: 'A map-based complaint reporting system for public transport.',
 };
 
 export default function RootLayout({
