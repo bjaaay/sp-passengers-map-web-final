@@ -35,6 +35,7 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
   const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
+  const isHttpUrl = complaint.incidentPhotoUrl && (complaint.incidentPhotoUrl.startsWith('http://') || complaint.incidentPhotoUrl.startsWith('https://'));
   
   return (
     <Card className={cn(
@@ -44,7 +45,7 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
     )}>
        <CardHeader className="p-4 cursor-pointer" onClick={onViewDetails}>
         <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
-           {complaint.incidentPhotoUrl ? (
+           {isHttpUrl ? (
             <Image
               src={complaint.incidentPhotoUrl}
               alt={`Incident involving ${complaint.licensePlate}`}

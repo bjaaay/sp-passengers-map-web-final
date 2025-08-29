@@ -45,6 +45,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
       console.error("Error parsing time:", e);
     }
   }
+  const isHttpUrl = complaint.incidentPhotoUrl && (complaint.incidentPhotoUrl.startsWith('http://') || complaint.incidentPhotoUrl.startsWith('https://'));
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -53,7 +54,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
         <DialogDescription className="sr-only">A dialog showing the details of a specific complaint, including the incident photo, vehicle information, and description.</DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="relative h-64 md:h-auto bg-muted">
-            {complaint.incidentPhotoUrl ? (
+            {isHttpUrl ? (
               <Image
                 src={complaint.incidentPhotoUrl}
                 alt={`Incident involving ${complaint.licensePlate}`}
