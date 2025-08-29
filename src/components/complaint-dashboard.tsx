@@ -65,19 +65,25 @@ export function ComplaintDashboard() {
     if (!currentUser) return;
 
     const complaintsRef = ref(database, 'complaints/');
-    const unsubscribe = onValue(complaintsRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log('Data from Firebase:', data);
-      if (data) {
-        const complaintsList: Complaint[] = Object.keys(data).map(key => ({
-          id: key,
-          ...data[key]
-        }));
-        setComplaints(complaintsList);
-      } else {
-        setComplaints([]);
+    const unsubscribe = onValue(complaintsRef, 
+      (snapshot) => {
+        const data = snapshot.val();
+        console.log('Data from Firebase:', data);
+        if (data) {
+          const complaintsList: Complaint[] = Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+          }));
+          setComplaints(complaintsList);
+        } else {
+          setComplaints([]);
+        }
+      },
+      (error) => {
+        console.error("Firebase Read Error:", error);
+        // You can add a toast notification here to inform the user
       }
-    });
+    );
     
     return () => unsubscribe();
   }, [currentUser]);
