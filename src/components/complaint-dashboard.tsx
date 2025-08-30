@@ -118,8 +118,8 @@ export function ComplaintDashboard() {
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
     const complaintToUpdate = complaints.find(c => c.id === id);
     if (complaintToUpdate && complaintToUpdate.userId) {
-      const reportRef = ref(database, `reports/${complaintToUpdate.userId}/${id}/status`);
-      update(ref(database, `reports/${complaintToUpdate.userId}/${id}`), { status })
+      const reportRef = ref(database, `reports/${complaintToUpdate.userId}/${id}`);
+      update(reportRef, { status })
         .then(() => {
             toast({ title: "Status Updated", description: `Complaint moved to ${status}` });
         })
