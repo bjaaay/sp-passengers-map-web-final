@@ -95,11 +95,9 @@ export function LoginForm() {
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="bg-card p-8 flex flex-col items-center justify-center">
           <div className="flex flex-col items-center text-center">
-            <div className="relative h-20 w-20 mb-4">
-              <PassengersMapLogo className="h-full w-full text-primary" />
+            <div className="relative h-32 w-32 mb-4">
+              <PassengersMapLogo className="h-full w-full" />
             </div>
-            <h1 className="text-4xl font-bold text-accent">Passengers</h1>
-            <p className="text-sm tracking-[0.4em] text-primary font-medium">MAP</p>
           </div>
         </div>
         <div className="p-8 bg-card">
