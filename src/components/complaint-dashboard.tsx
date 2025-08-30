@@ -181,6 +181,12 @@ export function ComplaintDashboard() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                     <DropdownMenuItem asChild>
+                        <Link href="/profile">
+                          <UserCircle className="mr-2 h-4 w-4" />
+                          <span>Profile</span>
+                        </Link>
+                      </DropdownMenuItem>
                      {userData.office === 'LTFRB' && (
                       <DropdownMenuItem asChild>
                         <Link href="/register-vehicle">
