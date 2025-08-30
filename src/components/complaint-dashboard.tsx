@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PassengersMapLogo } from './icons';
-import { Download, Search, UserCircle, LogOut, Settings, PlusCircle } from 'lucide-react';
+import { Search, UserCircle, LogOut, Settings, PlusCircle } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -122,29 +122,6 @@ export function ComplaintDashboard() {
     console.log(`Status for report ${id} changed to ${status}. DB update needs implementation.`);
   };
 
-  const downloadReports = () => {
-    if (filteredComplaints.length === 0) return;
-    const headers = Object.keys(filteredComplaints[0]).join(',');
-    const csv = [
-      headers,
-      ...filteredComplaints.map(row =>
-        Object.values(row).map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')
-      )
-    ].join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', 'complaint_reports.csv');
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   const filteredComplaints = useMemo(() => {
     return complaints.filter(complaint => {
       const searchMatch =
@@ -185,10 +162,6 @@ export function ComplaintDashboard() {
                 <h1 className="text-2xl font-bold tracking-tight">Passengers Map</h1>
               </div>
               <div className="flex items-center gap-4">
-                 <Button onClick={downloadReports} variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
