@@ -73,11 +73,6 @@ export function ProfileForm() {
           if (snapshot.exists()) {
             const dbData = snapshot.val();
             setUserData(dbData);
-            profileForm.reset({
-              firstName: dbData.firstName,
-              lastName: dbData.lastName,
-              username: dbData.username,
-            });
           } else {
             router.push('/');
           }
@@ -87,7 +82,17 @@ export function ProfileForm() {
       }
     });
     return () => unsubscribe();
-  }, [router, profileForm]);
+  }, [router]);
+  
+  useEffect(() => {
+    if (userData) {
+      profileForm.reset({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        username: userData.username,
+      });
+    }
+  }, [userData, profileForm]);
 
 
   const onPasswordSubmit = async (values: z.infer<typeof passwordFormSchema>) => {
