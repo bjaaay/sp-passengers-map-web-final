@@ -22,7 +22,7 @@ const vehicleIcons: Record<string, React.ReactNode> = {
   Tricycle: <Bike className="h-5 w-5" />,
   Trike: <Bike className="h-5 w-5" />,
   'Modern PUV': <Bus className="h-5 w-5" />,
-  Van: <Truck className="h-5 w-5" />,
+  UVExpress: <Truck className="h-5 w-5" />,
 };
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; borderColor: string; }> = {

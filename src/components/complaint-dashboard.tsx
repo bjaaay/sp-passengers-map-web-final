@@ -87,7 +87,7 @@ export function ComplaintDashboard() {
                 id: reportId,
                 userId: userId,
                 incidentPhotoUrl: imageUrl,
-                vehicleType: reportData.vehicle || 'Van',
+                vehicleType: reportData.vehicle || 'UVExpress',
                 licensePlate: reportData.plate || 'No Plate',
                 route: reportData.route || 'No Route',
                 incidentTime: reportData.time || 'No Time',
@@ -260,7 +260,7 @@ export function ComplaintDashboard() {
                     <SelectItem value="Tricycle">Tricycle</SelectItem>
                     <SelectItem value="Trike">Trike</SelectItem>
                     <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                    <SelectItem value="Van">Van</SelectItem>
+                    <SelectItem value="UVExpress">UVExpress</SelectItem>
                   </SelectContent>
                 </Select>
                  <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />

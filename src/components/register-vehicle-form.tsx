@@ -132,7 +132,7 @@ export function RegisterVehicleForm() {
                       <SelectItem value="Tricycle">Tricycle</SelectItem>
                       <SelectItem value="Trike">Trike</SelectItem>
                       <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                      <SelectItem value="Van">Van</SelectItem>
+                      <SelectItem value="UVExpress">UVExpress</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
