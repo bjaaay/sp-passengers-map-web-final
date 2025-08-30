@@ -89,9 +89,9 @@ export function SignUpForm() {
   return (
     <Card className="overflow-hidden shadow-lg">
       <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="bg-card p-8 flex flex-col items-center justify-center order-last md:order-first">
+        <div className="bg-card p-8 flex flex-col items-center justify-center">
           <div className="flex flex-col items-center text-center">
-            <div className="relative h-32 w-32 mb-4">
+            <div className="relative h-48 w-48 mb-4">
               <PassengersMapLogo className="h-full w-full" />
             </div>
           </div>
