@@ -12,25 +12,48 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { UserCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import { signOut, User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, database } from "@/lib/firebase";
+import { ref, onValue } from "firebase/database";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+interface UserData {
+  firstName: string;
+  lastName: string;
+  office: 'PSO' | 'LTFRB';
+  profilePictureUrl?: string;
+}
+
 export function LtfrbDashboard() {
   const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
+       if (user) {
+        setCurrentUser(user);
+        const userRef = ref(database, `users/${user.uid}`);
+        onValue(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            setUserData(snapshot.val());
+          }
+        });
+      } else {
+        router.push('/');
+      }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
   
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
   };
+
+  if (!currentUser || !userData) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -45,12 +68,21 @@ export function LtfrbDashboard() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={`https://i.pravatar.cc/150?u=${currentUser?.uid}`} alt="@user" />
-                    <AvatarFallback>L</AvatarFallback>
+                    <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser?.uid}`} alt="@user" />
+                    <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userData.firstName} {userData.lastName}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          LTFRB Office
+                        </p>
+                      </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
                  <DropdownMenuItem asChild>
                   <Link href="/profile">
                     <UserCircle className="mr-2 h-4 w-4" />

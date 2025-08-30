@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PassengersMapLogo } from './icons';
-import { Search, UserCircle, LogOut, Settings, PlusCircle } from 'lucide-react';
+import { Search, UserCircle, LogOut, Settings } from 'lucide-react';
 import { DatePicker } from './date-picker';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -31,6 +31,7 @@ interface UserData {
   firstName: string;
   lastName: string;
   office: 'PSO' | 'LTFRB';
+  profilePictureUrl?: string;
 }
 
 export function ComplaintDashboard() {
@@ -166,7 +167,7 @@ export function ComplaintDashboard() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={`https://i.pravatar.cc/150?u=${currentUser.uid}`} alt="@user" />
+                         <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser.uid}`} alt="@user" />
                         <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
                       </Avatar>
                     </Button>
@@ -187,14 +188,6 @@ export function ComplaintDashboard() {
                           <span>Profile</span>
                         </Link>
                       </DropdownMenuItem>
-                     {userData.office === 'LTFRB' && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/register-vehicle">
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          <span>Register Vehicle</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
                     <DropdownMenuItem>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>

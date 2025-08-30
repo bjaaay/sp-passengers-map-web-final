@@ -1,21 +1,20 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { onAuthStateChanged, User, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { ref, onValue, set, get, update } from "firebase/database";
+import { ref, onValue, update } from "firebase/database";
 import { auth, database } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, User as UserIcon, Mail, Lock, RefreshCcw, LogOut } from "lucide-react";
+import { ArrowLeft, User as UserIcon, Mail, Lock, RefreshCcw, LogOut, Camera } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -32,12 +31,14 @@ interface UserData {
   username: string;
   office: 'PSO' | 'LTFRB';
   email: string;
+  profilePictureUrl?: string;
 }
 
 const profileFormSchema = z.object({
   firstName: z.string().min(1, "First name is required."),
   lastName: z.string().min(1, "Last name is required."),
   username: z.string().min(1, "Username is required."),
+  profilePicture: z.any().optional(),
 });
 
 const passwordFormSchema = z.object({
@@ -55,6 +56,8 @@ export function ProfileForm() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -86,6 +89,7 @@ export function ProfileForm() {
               lastName: dbUser.lastName,
               username: dbUser.username,
             });
+            setImagePreview(dbUser.profilePictureUrl || null);
           }
         });
       } else {
@@ -101,16 +105,33 @@ export function ProfileForm() {
     router.push('/');
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
     if (!currentUser) return;
 
     try {
       const userRef = ref(database, `users/${currentUser.uid}`);
-      await update(userRef, {
+      const updates: Partial<UserData> = {
         firstName: values.firstName,
         lastName: values.lastName,
         username: values.username,
-      });
+      };
+
+      if (values.profilePicture && values.profilePicture.length > 0) {
+        const file = values.profilePicture[0];
+        const base64 = await fileToBase64(file);
+        updates.profilePictureUrl = base64;
+      }
+
+      await update(userRef, updates);
 
       toast({
         title: "Profile Updated",
@@ -172,8 +193,8 @@ export function ProfileForm() {
           </div>
           
           <div className="relative flex justify-center mb-6">
-            <Avatar className="h-28 w-28 border-4 border-white">
-              <AvatarImage src={`https://i.pravatar.cc/150?u=${currentUser.uid}`} />
+             <Avatar className="h-28 w-28 border-4 border-white">
+               <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser.uid}`} />
               <AvatarFallback className="text-4xl">{userData.firstName?.[0]}{userData.lastName?.[0]}</AvatarFallback>
             </Avatar>
           </div>
@@ -199,7 +220,15 @@ export function ProfileForm() {
           </div>
 
           <div className="mt-8">
-            <Button size="lg" className="w-full" onClick={() => setIsEditModalOpen(true)}>
+            <Button size="lg" className="w-full" onClick={() => {
+              profileForm.reset({
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                username: userData.username,
+              });
+              setImagePreview(userData.profilePictureUrl || null);
+              setIsEditModalOpen(true);
+            }}>
               Edit Profile
             </Button>
           </div>
@@ -214,6 +243,45 @@ export function ProfileForm() {
           </DialogHeader>
           <Form {...profileForm}>
             <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
+              <div className="flex justify-center">
+                <div className="relative">
+                  <Avatar className="h-24 w-24 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <AvatarImage src={imagePreview || undefined} />
+                    <AvatarFallback className="text-3xl">{userData.firstName?.[0]}{userData.lastName?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1.5 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <Camera className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                  <FormField
+                    control={profileForm.control}
+                    name="profilePicture"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input 
+                            type="file" 
+                            accept="image/*"
+                            ref={fileInputRef}
+                            className="hidden"
+                            onChange={(e) => {
+                              field.onChange(e.target.files);
+                              if (e.target.files && e.target.files[0]) {
+                                const file = e.target.files[0];
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setImagePreview(reader.result as string);
+                                }
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
               <FormField
                 control={profileForm.control}
                 name="firstName"
