@@ -4,7 +4,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ComplaintDashboard } from "@/components/complaint-dashboard"
 import { RegisterVehicleForm } from "@/components/register-vehicle-form"
-import { PassengersMapLogo } from './icons';
 import { VehicleList } from "./vehicle-list";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -61,8 +60,10 @@ export function LtfrbDashboard() {
          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
            <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <PassengersMapLogo className="h-7 w-7 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight">LTFRB Dashboard</h1>
+               <h1 className="text-2xl font-bold tracking-tight">
+                  <span className="text-green-500">Passengers</span>
+                  <span className="text-blue-500"> Map</span>
+                </h1>
             </div>
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
