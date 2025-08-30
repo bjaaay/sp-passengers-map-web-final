@@ -1,0 +1,15 @@
+
+{
+  "hosting": {
+    "site": "passengers-map-71296",
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
+  }
+}
