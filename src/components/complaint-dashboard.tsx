@@ -25,6 +25,7 @@ import { database, auth } from '@/lib/firebase';
 import { ref, onValue, update } from 'firebase/database';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface UserData {
   firstName: string;
