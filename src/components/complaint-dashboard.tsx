@@ -40,7 +40,7 @@ export function ComplaintDashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
   const [userData, setUserData] = useState<UserData | null>(null);
   const router = useRouter();
 
