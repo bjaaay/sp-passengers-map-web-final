@@ -6,7 +6,7 @@ import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle, ImageOff } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle, ImageOff, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -14,6 +14,7 @@ interface ComplaintCardProps {
   complaint: Complaint;
   onStatusChange: (id: string, status: 'New' | 'Review' | 'Resolved') => void;
   onViewDetails: () => void;
+  onDelete: (id: string) => void;
 }
 
 const vehicleIcons: Record<string, React.ReactNode> = {
@@ -31,7 +32,7 @@ const statusConfig: Record<string, { icon: React.ReactNode; color: string; borde
     Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300', borderColor: 'border-gray-200 dark:border-gray-800' },
 }
 
-export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: ComplaintCardProps) {
+export function ComplaintCard({ complaint, onStatusChange, onViewDetails, onDelete }: ComplaintCardProps) {
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
   const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
@@ -84,24 +85,31 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails }: Comp
           <MessageSquareText className="mr-2 h-4 w-4" />
           Details
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              Change Status
+        {complaint.status === 'Resolved' ? (
+            <Button variant="destructive" size="sm" onClick={() => onDelete(complaint.id)}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[180px]">
-            {(['New', 'Review', 'Resolved'] as const).map((status) => (
-              <DropdownMenuItem
-                key={status}
-                disabled={complaint.status === status}
-                onClick={() => onStatusChange(complaint.id, status)}
-              >
-                {status}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Change Status
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[180px]">
+                {(['New', 'Review', 'Resolved'] as const).map((status) => (
+                  <DropdownMenuItem
+                    key={status}
+                    disabled={complaint.status === status}
+                    onClick={() => onStatusChange(complaint.id, status)}
+                  >
+                    {status}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
       </CardFooter>
     </Card>
   );

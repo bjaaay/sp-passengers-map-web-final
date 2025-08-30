@@ -21,10 +21,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { database, auth } from '@/lib/firebase';
-import { ref, onValue, update } from 'firebase/database';
+import { ref, onValue, update, remove } from 'firebase/database';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserData {
   firstName: string;
@@ -42,7 +44,9 @@ export function ComplaintDashboard() {
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [complaintToDelete, setComplaintToDelete] = useState<Complaint | null>(null);
   const router = useRouter();
+  const { toast } = useToast();
 
 
   useEffect(() => {
@@ -81,6 +85,7 @@ export function ComplaintDashboard() {
               
               const complaint: Complaint = {
                 id: reportId,
+                userId: userId,
                 incidentPhotoUrl: imageUrl,
                 vehicleType: reportData.vehicle || 'Van',
                 licensePlate: reportData.plate || 'No Plate',
@@ -111,15 +116,36 @@ export function ComplaintDashboard() {
   };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
-    setComplaints(prevComplaints =>
-        prevComplaints.map(c => c.id === id ? { ...c, status } : c)
-    );
-
-    if (selectedComplaint && selectedComplaint.id === id) {
-        setSelectedComplaint(prev => prev ? { ...prev, status } : null);
+    const complaintToUpdate = complaints.find(c => c.id === id);
+    if (complaintToUpdate && complaintToUpdate.userId) {
+      const reportRef = ref(database, `reports/${complaintToUpdate.userId}/${id}/status`);
+      update(ref(database, `reports/${complaintToUpdate.userId}/${id}`), { status })
+        .then(() => {
+            toast({ title: "Status Updated", description: `Complaint moved to ${status}` });
+        })
+        .catch(error => {
+            toast({ variant: 'destructive', title: "Update Failed", description: error.message });
+        });
     }
-    
-    console.log(`Status for report ${id} changed to ${status}. DB update needs implementation.`);
+  };
+
+  const handleDeleteComplaint = async () => {
+    if (!complaintToDelete || !complaintToDelete.userId) return;
+    const reportRef = ref(database, `reports/${complaintToDelete.userId}/${complaintToDelete.id}`);
+    try {
+      await remove(reportRef);
+      toast({
+        title: "Complaint Deleted",
+        description: "The complaint has been successfully removed.",
+      });
+      setComplaintToDelete(null);
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: "An error occurred while deleting the complaint.",
+      });
+    }
   };
 
   const filteredComplaints = useMemo(() => {
@@ -257,6 +283,7 @@ export function ComplaintDashboard() {
                   complaint={complaint}
                   onStatusChange={updateReportStatus}
                   onViewDetails={() => setSelectedComplaint(complaint)}
+                  onDelete={() => setComplaintToDelete(complaint)}
                 />
               </motion.div>
             ))}
@@ -282,6 +309,22 @@ export function ComplaintDashboard() {
           onStatusChange={updateReportStatus}
         />
       )}
+
+      <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the complaint
+              for license plate <span className="font-bold">{complaintToDelete?.licensePlate}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setComplaintToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteComplaint}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
     </div>
   );
