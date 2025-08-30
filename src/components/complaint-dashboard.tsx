@@ -69,46 +69,50 @@ export function ComplaintDashboard() {
 
   useEffect(() => {
     if (!currentUser) return;
-  
-    const reportsRef = ref(database, 'reports/');
+
+    const reportsRef = ref(database, 'reports');
+
     const unsubscribe = onValue(reportsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const allComplaints: Complaint[] = [];
-        Object.keys(data).forEach(userId => {
-          const userReports = data[userId];
-          if (userReports) {
-            Object.keys(userReports).forEach(reportId => {
-              const reportData = userReports[reportId];
-              
-              const imageUrl = (reportData.images && Array.isArray(reportData.images) && reportData.images.length > 0) ? reportData.images[0] : '';
-              
-              const complaint: Complaint = {
-                id: reportId,
-                userId: userId,
-                incidentPhotoUrl: imageUrl,
-                vehicleType: reportData.vehicle || 'UVExpress',
-                licensePlate: reportData.plate || 'No Plate',
-                route: reportData.route || 'No Route',
-                incidentTime: reportData.time || 'No Time',
-                incidentDate: reportData.date || 'No Date',
-                description: reportData.description || 'No Description',
-                status: reportData.status || 'New',
-              };
-              allComplaints.push(complaint);
+      const allReports = snapshot.val();
+      if (allReports) {
+        const loadedComplaints: Complaint[] = [];
+        // The data is nested by user ID, then by report ID
+        Object.keys(allReports).forEach(userId => {
+          const userReports = allReports[userId];
+          Object.keys(userReports).forEach(reportId => {
+            const reportData = userReports[reportId];
+            const imageUrl = (reportData.images && Array.isArray(reportData.images) && reportData.images.length > 0) ? reportData.images[0] : '';
+            loadedComplaints.push({
+              id: reportId,
+              userId: userId,
+              incidentPhotoUrl: imageUrl,
+              vehicleType: reportData.vehicle || 'UVExpress',
+              licensePlate: reportData.plate || 'No Plate',
+              route: reportData.route || 'No Route',
+              incidentTime: reportData.time || 'No Time',
+              incidentDate: reportData.date || 'No Date',
+              description: reportData.description || 'No Description',
+              status: reportData.status || 'New',
             });
-          }
+          });
         });
-        setComplaints(allComplaints);
+        setComplaints(loadedComplaints);
       } else {
         setComplaints([]);
       }
     }, (error) => {
       console.error("Firebase Read Error:", error);
+       toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "You do not have permission to view reports. Please contact an administrator.",
+      });
     });
-  
+
     return () => unsubscribe();
-  }, [currentUser]);
+
+  }, [currentUser, toast]);
+
 
   const handleLogout = async () => {
     await signOut(auth);
