@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -20,20 +21,8 @@ export function RegisterVehicleForm() {
   const [or, setOr] = useState<File | null>(null)
 
   return (
-    <div className="flex flex-col h-screen">
-      <header className="bg-primary text-primary-foreground p-4 flex justify-between items-center">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft />
-          </Button>
-        </Link>
-        <h1 className="text-lg font-semibold">Register Vehicle</h1>
-        <Button variant="ghost" size="icon">
-          <Menu />
-        </Button>
-      </header>
-      <main className="flex-1 p-6 bg-secondary">
-        <div className="max-w-md mx-auto bg-card p-6 rounded-lg shadow-md">
+    <div className="flex flex-col h-full">
+      <main className="flex-1 bg-card p-6 rounded-lg shadow-md">
           <p className="text-sm text-red-500 mb-4">*The following details are required before becoming verified*</p>
           <form className="space-y-6">
             <div className="space-y-2">
@@ -79,8 +68,7 @@ export function RegisterVehicleForm() {
               Register
             </Button>
           </form>
-        </div>
-      </main>
+        </main>
     </div>
   )
 }

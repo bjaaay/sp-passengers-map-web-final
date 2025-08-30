@@ -42,7 +42,6 @@ export function LoginForm() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // After successful login, check user's office in Realtime Database
       const userRef = ref(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
 
@@ -51,14 +50,17 @@ export function LoginForm() {
         const allowedOffices = ['PSO', 'LTFRB'];
         
         if (userData.office && allowedOffices.includes(userData.office)) {
-          // User is authorized, proceed to dashboard
           toast({
             title: "Login Successful",
             description: "Welcome back!",
           });
-          router.push("/dashboard");
+          
+          if (userData.office === 'LTFRB') {
+            router.push("/ltfrb-dashboard");
+          } else {
+            router.push("/dashboard");
+          }
         } else {
-          // User is not an authorized officer, log them out and show error
           await signOut(auth);
           toast({
             variant: "destructive",
@@ -67,7 +69,6 @@ export function LoginForm() {
           });
         }
       } else {
-        // No user data found in the database, deny access
         await signOut(auth);
         toast({
           variant: "destructive",
