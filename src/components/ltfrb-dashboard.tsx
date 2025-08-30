@@ -6,6 +6,7 @@ import { ComplaintDashboard } from "@/components/complaint-dashboard"
 import { RegisterVehicleForm } from "@/components/register-vehicle-form"
 import { PassengersMapLogo } from './icons';
 import { ProfileForm } from "./profile-form";
+import { VehicleList } from "./vehicle-list";
 
 export function LtfrbDashboard() {
   return (
@@ -22,19 +23,22 @@ export function LtfrbDashboard() {
        </header>
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="complaints" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto">
             <TabsTrigger value="complaints">Complaints</TabsTrigger>
             <TabsTrigger value="register-vehicle">Register Vehicle</TabsTrigger>
+            <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="complaints" className="mt-6">
-            {/* The ComplaintDashboard already has its own header, so we render it as is */}
             <ComplaintDashboard />
           </TabsContent>
           <TabsContent value="register-vehicle" className="mt-6">
             <div className="max-w-2xl mx-auto">
               <RegisterVehicleForm />
             </div>
+          </TabsContent>
+           <TabsContent value="vehicles" className="mt-6">
+            <VehicleList />
           </TabsContent>
           <TabsContent value="profile" className="mt-6">
              <div className="max-w-2xl mx-auto">

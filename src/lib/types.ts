@@ -9,4 +9,12 @@ export type Complaint = {
   description: string;
   status: 'New' | 'Review' | 'Resolved';
 };
- 
+
+export type Vehicle = {
+  plateNumber: string;
+  vehicleType: string;
+  gpsTrackerId: string;
+  registrationDate: string;
+  corUrl: string;
+  orUrl: string;
+};
