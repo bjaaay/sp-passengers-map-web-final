@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react";
@@ -6,16 +7,16 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PassengersMapLogo } from "@/components/icons";
 import { Eye, EyeOff } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, database } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+import { ref, get } from "firebase/database";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -38,17 +39,52 @@ export function LoginForm() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-      });
-      router.push("/dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // After successful login, check user's office in Realtime Database
+      const userRef = ref(database, `users/${user.uid}`);
+      const snapshot = await get(userRef);
+
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        const allowedOffices = ['PSO', 'LTFRB'];
+        
+        if (userData.office && allowedOffices.includes(userData.office)) {
+          // User is authorized, proceed to dashboard
+          toast({
+            title: "Login Successful",
+            description: "Welcome back!",
+          });
+          router.push("/dashboard");
+        } else {
+          // User is not an authorized officer, log them out and show error
+          await signOut(auth);
+          toast({
+            variant: "destructive",
+            title: "Access Denied",
+            description: "You are not authorized to access this system. Please contact an administrator.",
+          });
+        }
+      } else {
+        // No user data found in the database, deny access
+        await signOut(auth);
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "User profile not found. Please contact an administrator.",
+        });
+      }
+
     } catch (error: any) {
+      let errorMessage = "An unknown error occurred. Please try again.";
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid email or password. Please try again.";
+      }
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };
@@ -68,7 +104,7 @@ export function LoginForm() {
         <div className="p-8 bg-card">
           <div className="flex flex-col justify-center h-full">
             <div className="w-full max-w-sm mx-auto">
-              <h2 className="text-2xl font-semibold text-center text-primary mb-6">Login</h2>
+              <h2 className="text-2xl font-semibold text-center text-primary mb-6">Admin Login</h2>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
