@@ -14,16 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, User as UserIcon, Mail, Lock, RefreshCcw, LogOut, Camera } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-
+import { ArrowLeft, User as UserIcon, Mail, Lock, LogOut, Camera, KeyRound, ShieldCheck } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "./ui/separator";
 
 interface UserData {
   firstName: string;
@@ -49,7 +43,6 @@ const passwordFormSchema = z.object({
   message: "New passwords do not match.",
   path: ["confirmPassword"],
 });
-
 
 export function ProfileForm() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -181,57 +174,76 @@ export function ProfileForm() {
 
   return (
     <>
-      <div className="relative min-h-screen bg-secondary">
-        <div className="absolute top-0 left-0 w-full h-48 bg-primary rounded-b-[50%]"></div>
-        <div className="relative p-4">
-          <div className="flex items-center justify-between text-white mb-8">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft />
-            </Button>
-            <h1 className="text-xl font-semibold">{`${userData.firstName} ${userData.lastName}`}</h1>
-            <div className="w-10"></div>
-          </div>
+      <div className="min-h-screen bg-secondary">
+        <div className="container mx-auto py-8">
+            <div className="flex items-center mb-8">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="mr-4">
+                <ArrowLeft />
+                </Button>
+                <h1 className="text-3xl font-bold">Profile Settings</h1>
+            </div>
           
-          <div className="relative flex justify-center mb-6">
-             <Avatar className="h-28 w-28 border-4 border-white">
-               <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser.uid}`} />
-              <AvatarFallback className="text-4xl">{userData.firstName?.[0]}{userData.lastName?.[0]}</AvatarFallback>
-            </Avatar>
-          </div>
+            <div className="grid md:grid-cols-3 gap-8">
+                <div className="md:col-span-1">
+                    <Card>
+                        <CardContent className="p-6 text-center">
+                            <Avatar className="h-28 w-28 border-4 border-white mx-auto mb-4">
+                                <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser.uid}`} />
+                                <AvatarFallback className="text-4xl">{userData.firstName?.[0]}{userData.lastName?.[0]}</AvatarFallback>
+                            </Avatar>
+                            <h2 className="text-2xl font-bold">{`${userData.firstName} ${userData.lastName}`}</h2>
+                            <p className="text-muted-foreground">@{userData.username}</p>
+                            <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+                             <Button className="mt-4 w-full" onClick={() => {
+                                profileForm.reset({
+                                    firstName: userData.firstName,
+                                    lastName: userData.lastName,
+                                    username: userData.username,
+                                });
+                                setImagePreview(userData.profilePictureUrl || null);
+                                setIsEditModalOpen(true);
+                                }}>
+                                Edit Profile
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
 
-          <div className="bg-background rounded-lg shadow-sm p-6 space-y-4">
-            <div className="flex items-center space-x-4 py-2 border-b">
-              <UserIcon className="h-6 w-6 text-muted-foreground" />
-              <span>{`${userData.firstName} ${userData.lastName}`}</span>
-            </div>
-            <div className="flex items-center space-x-4 py-2 border-b">
-              <Mail className="h-6 w-6 text-muted-foreground" />
-              <span>{currentUser.email}</span>
-            </div>
-            <button onClick={() => setIsPasswordModalOpen(true)} className="w-full flex items-center space-x-4 py-2 border-b text-left">
-              <Lock className="h-6 w-6 text-muted-foreground" />
-              <span>Password</span>
-              <RefreshCcw className="h-5 w-5 text-muted-foreground ml-auto" />
-            </button>
-            <button onClick={handleLogout} className="w-full flex items-center space-x-4 py-2 text-left">
-              <LogOut className="h-6 w-6 text-muted-foreground" />
-              <span>Logout</span>
-            </button>
-          </div>
+                <div className="md:col-span-2 space-y-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Security</CardTitle>
+                            <CardDescription>Manage your password and account security.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <div className="flex items-center">
+                                <KeyRound className="h-5 w-5 mr-3 text-muted-foreground"/>
+                                <span>Password</span>
+                                <Button variant="outline" className="ml-auto" onClick={() => setIsPasswordModalOpen(true)}>Change Password</Button>
+                           </div>
+                           <Separator className="my-4"/>
+                           <div className="flex items-center">
+                                <ShieldCheck className="h-5 w-5 mr-3 text-muted-foreground"/>
+                                <span>Account Status</span>
+                               <span className="ml-auto text-sm font-medium text-green-600">Verified</span>
+                           </div>
+                        </CardContent>
+                    </Card>
 
-          <div className="mt-8">
-            <Button size="lg" className="w-full" onClick={() => {
-              profileForm.reset({
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                username: userData.username,
-              });
-              setImagePreview(userData.profilePictureUrl || null);
-              setIsEditModalOpen(true);
-            }}>
-              Edit Profile
-            </Button>
-          </div>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Account Actions</CardTitle>
+                             <CardDescription>Log out from your account.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
       </div>
 
@@ -392,3 +404,5 @@ export function ProfileForm() {
     </>
   );
 }
+
+    
