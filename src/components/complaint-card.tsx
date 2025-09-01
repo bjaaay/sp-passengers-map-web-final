@@ -20,9 +20,9 @@ interface ComplaintCardProps {
 const vehicleIcons: Record<string, React.ReactNode> = {
   Jeepney: <Car className="h-5 w-5" />,
   Tricycle: <Bike className="h-5 w-5" />,
-  Trike: <Bike className="h-5 w-5" />,
+  'E-trike': <Bike className="h-5 w-5" />,
   'Modern PUV': <Bus className="h-5 w-5" />,
-  UVExpress: <Truck className="h-5 w-5" />,
+  'UV Express': <Truck className="h-5 w-5" />,
 };
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; borderColor: string; }> = {
@@ -85,31 +85,25 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails, onDele
           <MessageSquareText className="mr-2 h-4 w-4" />
           Details
         </Button>
-        {complaint.status === 'Resolved' ? (
-            <Button variant="destructive" size="sm" onClick={() => onDelete(complaint.id)}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={complaint.status === 'Resolved'}>
+              Change Status
             </Button>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  Change Status
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
-                {(['New', 'Review', 'Resolved'] as const).map((status) => (
-                  <DropdownMenuItem
-                    key={status}
-                    disabled={complaint.status === status}
-                    onClick={() => onStatusChange(complaint.id, status)}
-                  >
-                    {status}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[180px]">
+            {(['New', 'Review', 'Resolved'] as const).map((status) => (
+              <DropdownMenuItem
+                key={status}
+                disabled={complaint.status === status}
+                onClick={() => onStatusChange(complaint.id, status)}
+              >
+                {status}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
   );

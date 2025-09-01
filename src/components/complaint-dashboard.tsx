@@ -35,8 +35,15 @@ interface UserData {
   profilePictureUrl?: string;
 }
 
-export function ComplaintDashboard() {
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
+interface ComplaintDashboardProps {
+  complaints?: Complaint[];
+  onStatusChange?: (id: string, status: 'New' | 'Review' | 'Resolved') => void;
+  onDelete?: (complaint: Complaint) => void;
+  isEmbedded?: boolean;
+}
+
+export function ComplaintDashboard({ complaints: initialComplaints, onStatusChange, onDelete, isEmbedded = false }: ComplaintDashboardProps) {
+  const [complaints, setComplaints] = useState<Complaint[]>(initialComplaints || []);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -59,16 +66,23 @@ export function ComplaintDashboard() {
             setUserData(snapshot.val());
           }
         });
-      } else {
+      } else if (!isEmbedded) { // Don't redirect if it's part of another dashboard
         router.push('/');
       }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, isEmbedded]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    // If complaints are passed as props, use them directly.
+    if (initialComplaints) {
+      setComplaints(initialComplaints);
+      return;
+    }
+    
+    // Otherwise, fetch them if this is not an embedded component.
+    if (!currentUser || isEmbedded) return;
 
     const reportsRef = ref(database, 'reports');
 
@@ -86,7 +100,7 @@ export function ComplaintDashboard() {
               id: reportId,
               userId: userId,
               incidentPhotoUrl: imageUrl,
-              vehicleType: reportData.vehicle || 'UVExpress',
+              vehicleType: reportData.vehicle || 'UV Express',
               licensePlate: reportData.plate || 'No Plate',
               route: reportData.route || 'No Route',
               incidentTime: reportData.time || 'No Time',
@@ -111,7 +125,7 @@ export function ComplaintDashboard() {
 
     return () => unsubscribe();
 
-  }, [currentUser, toast]);
+  }, [currentUser, toast, isEmbedded, initialComplaints]);
 
 
   const handleLogout = async () => {
@@ -120,6 +134,10 @@ export function ComplaintDashboard() {
   };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
+    if (onStatusChange) {
+      onStatusChange(id, status);
+      return;
+    }
     const complaintToUpdate = complaints.find(c => c.id === id);
     if (complaintToUpdate && complaintToUpdate.userId) {
       const reportRef = ref(database, `reports/${complaintToUpdate.userId}/${id}`);
@@ -152,7 +170,11 @@ export function ComplaintDashboard() {
     }
   };
 
-  const filteredComplaints = useMemo(() => {
+  const internalFilteredComplaints = useMemo(() => {
+     if (isEmbedded) {
+      // If embedded, the parent component handles filtering.
+      return complaints;
+    }
     return complaints.filter(complaint => {
       const searchMatch =
         searchTerm === '' ||
@@ -167,9 +189,17 @@ export function ComplaintDashboard() {
       
       return searchMatch && statusMatch && vehicleMatch && dateMatch;
     });
-  }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, dateFilter]);
+  }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, dateFilter, isEmbedded]);
 
-  if (!currentUser || !userData) {
+  const handleDeleteClick = (complaint: Complaint) => {
+    if (onDelete) {
+      onDelete(complaint);
+    } else {
+      setComplaintToDelete(complaint);
+    }
+  }
+
+  if (!isEmbedded && (!currentUser || !userData)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p>Loading...</p>
@@ -177,12 +207,10 @@ export function ComplaintDashboard() {
     );
   }
 
-  // A flag to determine if the dashboard is being rendered inside another component (like the LTFRB dashboard)
-  const isEmbedded = userData.office === 'LTFRB';
+  const complaintsToRender = isEmbedded ? initialComplaints || [] : internalFilteredComplaints;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Conditionally render header if not embedded */}
       {!isEmbedded && (
         <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -198,17 +226,17 @@ export function ComplaintDashboard() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                         <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser.uid}`} alt="@user" />
-                        <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
+                         <AvatarImage src={userData?.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser?.uid}`} alt="@user" />
+                        <AvatarFallback>{userData?.firstName?.[0]}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userData.firstName} {userData.lastName}</p>
+                        <p className="text-sm font-medium leading-none">{userData?.firstName} {userData?.lastName}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          {userData.office === 'PSO' ? 'Public Safety Office' : 'LTFRB Office'}
+                          {userData?.office === 'PSO' ? 'Public Safety Office' : 'LTFRB Office'}
                         </p>
                       </div>
                     </DropdownMenuLabel>
@@ -262,9 +290,9 @@ export function ComplaintDashboard() {
                     <SelectItem value="All">All Vehicles</SelectItem>
                     <SelectItem value="Jeepney">Jeepney</SelectItem>
                     <SelectItem value="Tricycle">Tricycle</SelectItem>
-                    <SelectItem value="Trike">Trike</SelectItem>
+                    <SelectItem value="E-trike">E-trike</SelectItem>
                     <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                    <SelectItem value="UVExpress">UVExpress</SelectItem>
+                    <SelectItem value="UV Express">UV Express</SelectItem>
                   </SelectContent>
                 </Select>
                  <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
@@ -274,26 +302,25 @@ export function ComplaintDashboard() {
         </header>
       )}
 
-      {/* Main content area, adjusts padding if embedded */}
       <main className={cn("flex-grow", !isEmbedded && "container mx-auto px-4 sm:px-6 lg:px-8 py-8")}>
         <AnimatePresence>
           <motion.div 
             layout
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
-            {filteredComplaints.map(complaint => (
+            {complaintsToRender.map(complaint => (
                <motion.div layout key={complaint.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
                 <ComplaintCard
                   complaint={complaint}
                   onStatusChange={updateReportStatus}
                   onViewDetails={() => setSelectedComplaint(complaint)}
-                  onDelete={() => setComplaintToDelete(complaint)}
+                  onDelete={() => handleDeleteClick(complaint)}
                 />
               </motion.div>
             ))}
           </motion.div>
         </AnimatePresence>
-        {filteredComplaints.length === 0 && (
+        {complaintsToRender.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-lg font-medium">No complaints found.</p>
             <p>Try adjusting your filters or search term.</p>
@@ -314,7 +341,7 @@ export function ComplaintDashboard() {
         />
       )}
 
-      <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
+      {!isEmbedded && <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -328,7 +355,7 @@ export function ComplaintDashboard() {
             <AlertDialogAction onClick={handleDeleteComplaint}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog>}
       
     </div>
   );
