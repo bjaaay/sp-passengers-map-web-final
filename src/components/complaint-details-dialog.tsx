@@ -65,7 +65,7 @@ export function ComplaintDetailsDialog({ complaint, isOpen, onOpenChange, onStat
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
                 <ImageOff className="h-12 w-12 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">Original image is not available.</p>
+                <p className="mt-2 text-sm text-muted-foreground">No photo provided.</p>
               </div>
             )}
           </div>

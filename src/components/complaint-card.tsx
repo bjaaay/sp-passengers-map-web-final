@@ -55,8 +55,9 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails, onDele
               className="object-cover"
             />
            ) : (
-            <div className="flex h-full w-full items-center justify-center">
+            <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
               <ImageOff className="h-10 w-10 text-muted-foreground" />
+              <p className="mt-2 text-sm text-muted-foreground">No photo provided</p>
             </div>
            )}
         </div>
