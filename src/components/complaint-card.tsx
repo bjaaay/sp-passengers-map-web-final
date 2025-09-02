@@ -1,4 +1,3 @@
-
 "use client"
 
 import Image from 'next/image';
@@ -6,9 +5,14 @@ import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, Car, Bike, Bus, Truck, MessageSquareText, HelpCircle, ImageOff, Trash2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, Car, MessageSquareText, HelpCircle, ImageOff, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { JeepneyIcon } from './jeepney-icon';
+import { TricycleIcon } from './tricycle-icon';
+import { ETrikeIcon } from './e-trike-icon';
+import { ModernPuvIcon } from './modern-puv-icon';
+import { UvExpressIcon } from './uv-express-icon';
 
 interface ComplaintCardProps {
   complaint: Complaint;
@@ -18,17 +22,17 @@ interface ComplaintCardProps {
 }
 
 const vehicleIcons: Record<string, React.ReactNode> = {
-  Jeepney: <Car className="h-5 w-5" />,
-  Tricycle: <Bike className="h-5 w-5" />,
-  'E-trike': <Bike className="h-5 w-5" />,
-  'Modern PUV': <Bus className="h-5 w-5" />,
-  'UV Express': <Truck className="h-5 w-5" />,
+  Jeepney: <JeepneyIcon className="h-5 w-5" />,
+  Tricycle: <TricycleIcon className="h-5 w-5" />,
+  'E-trike': <ETrikeIcon className="h-5 w-5" />,
+  'Modern PUV': <ModernPuvIcon className="h-5 w-5" />,
+  'UV Express': <UvExpressIcon className="h-5 w-5" />,
 };
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; borderColor: string; }> = {
     New: { icon: <AlertCircle className="mr-1.5 h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', borderColor: 'border-yellow-200 dark:border-yellow-800' },
     Review: { icon: <Eye className="mr-1.5 h-4 w-4" />, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', borderColor: 'border-blue-200 dark:border-blue-800' },
-    Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', borderColor: 'border-green-200 dark:border-green-800' },
+    Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300', borderColor: 'border-green-200 dark:border-green-800' },
     Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300', borderColor: 'border-gray-200 dark:border-gray-800' },
 }
 
