@@ -21,7 +21,9 @@ import { DatePicker } from './date-picker';
 import type { Complaint } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
-
+import { MunicipalContactsForm } from "./municipal-contacts-form";
+import { TerminalForm } from "./terminal-form";
+import { MunicipalityForm } from "./municipality-form";
 
 interface UserData {
   firstName: string;
@@ -215,10 +217,13 @@ export function LtfrbDashboard() {
        </header>
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="complaints" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-xl mx-auto">
+          <TabsList className="grid w-full grid-cols-6 max-w-4xl mx-auto">
             <TabsTrigger value="complaints">Complaints</TabsTrigger>
             <TabsTrigger value="register-vehicle">Register Vehicle</TabsTrigger>
             <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
+            <TabsTrigger value="municipal-contacts">Municipal Contacts</TabsTrigger>
+            <TabsTrigger value="terminals">Terminals</TabsTrigger>
+            <TabsTrigger value="municipality">Municipality</TabsTrigger>
           </TabsList>
           <TabsContent value="complaints" className="mt-6">
             <div className="py-4 border-b flex flex-col sm:flex-row gap-2">
@@ -274,6 +279,21 @@ export function LtfrbDashboard() {
           </TabsContent>
            <TabsContent value="vehicles" className="mt-6">
             <VehicleList />
+          </TabsContent>
+          <TabsContent value="municipal-contacts" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <MunicipalContactsForm />
+            </div>
+          </TabsContent>
+          <TabsContent value="terminals" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <TerminalForm />
+            </div>
+          </TabsContent>
+          <TabsContent value="municipality" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <MunicipalityForm />
+            </div>
           </TabsContent>
         </Tabs>
       </main>

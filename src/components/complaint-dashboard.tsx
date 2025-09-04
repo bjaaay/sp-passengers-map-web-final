@@ -27,6 +27,10 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MunicipalContactsForm } from "./municipal-contacts-form";
+import { TerminalForm } from "./terminal-form";
+import { MunicipalityForm } from "./municipality-form";
 
 interface UserData {
   firstName: string;
@@ -260,72 +264,101 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
                 </DropdownMenu>
               </div>
             </div>
-            <div className="py-4 flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by license plate or description..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-2 sm:flex gap-2">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[150px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All Statuses</SelectItem>
-                    <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="Review">Review</SelectItem>
-                    <SelectItem value="Resolved">Resolved</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
-                  <SelectTrigger className="w-full sm:w-[150px]">
-                    <SelectValue placeholder="Vehicle Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All Vehicles</SelectItem>
-                    <SelectItem value="Jeepney">Jeepney</SelectItem>
-                    <SelectItem value="Tricycle">Tricycle</SelectItem>
-                    <SelectItem value="E-trike">E-trike</SelectItem>
-                    <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                    <SelectItem value="UV Express">UV Express</SelectItem>
-                  </SelectContent>
-                </Select>
-                 <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
-              </div>
-            </div>
           </div>
         </header>
       )}
 
       <main className={cn("flex-grow", !isEmbedded && "container mx-auto px-4 sm:px-6 lg:px-8 py-8")}>
-        <AnimatePresence>
-          <motion.div 
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
-            {complaintsToRender.map(complaint => (
-               <motion.div layout key={complaint.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
-                <ComplaintCard
-                  complaint={complaint}
-                  onStatusChange={updateReportStatus}
-                  onViewDetails={() => setSelectedComplaint(complaint)}
-                  onDelete={() => handleDeleteClick(complaint)}
-                />
+         <Tabs defaultValue="complaints" className="w-full">
+           {!isEmbedded && (
+              <TabsList className="grid w-full grid-cols-4 max-w-xl mx-auto">
+                <TabsTrigger value="complaints">Complaints</TabsTrigger>
+                <TabsTrigger value="municipal-contacts">Municipal Contacts</TabsTrigger>
+                <TabsTrigger value="terminals">Terminals</TabsTrigger>
+                <TabsTrigger value="municipality">Municipality</TabsTrigger>
+              </TabsList>
+           )}
+          <TabsContent value="complaints" className="mt-6">
+             {!isEmbedded && (
+               <div className="py-4 border-b flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by license plate or description..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-2 sm:flex gap-2">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[150px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Statuses</SelectItem>
+                      <SelectItem value="New">New</SelectItem>
+                      <SelectItem value="Review">Review</SelectItem>
+                      <SelectItem value="Resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
+                    <SelectTrigger className="w-full sm:w-[150px]">
+                      <SelectValue placeholder="Vehicle Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Vehicles</SelectItem>
+                      <SelectItem value="Jeepney">Jeepney</SelectItem>
+                      <SelectItem value="Tricycle">Tricycle</SelectItem>
+                      <SelectItem value="E-trike">E-trike</SelectItem>
+                      <SelectItem value="Modern PUV">Modern PUV</SelectItem>
+                      <SelectItem value="UV Express">UV Express</SelectItem>
+                    </SelectContent>
+                  </Select>
+                   <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
+                </div>
+              </div>
+            )}
+            <AnimatePresence>
+              <motion.div 
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
+                {complaintsToRender.map(complaint => (
+                   <motion.div layout key={complaint.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
+                    <ComplaintCard
+                      complaint={complaint}
+                      onStatusChange={updateReportStatus}
+                      onViewDetails={() => setSelectedComplaint(complaint)}
+                      onDelete={() => handleDeleteClick(complaint)}
+                    />
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-        {complaintsToRender.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
-            <p className="text-lg font-medium">No complaints found.</p>
-            <p>Try adjusting your filters or search term.</p>
-          </div>
-        )}
+            </AnimatePresence>
+            {complaintsToRender.length === 0 && (
+              <div className="text-center py-16 text-muted-foreground">
+                <p className="text-lg font-medium">No complaints found.</p>
+                <p>Try adjusting your filters or search term.</p>
+              </div>
+            )}
+          </TabsContent>
+           <TabsContent value="municipal-contacts" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <MunicipalContactsForm />
+            </div>
+          </TabsContent>
+          <TabsContent value="terminals" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <TerminalForm />
+            </div>
+          </TabsContent>
+          <TabsContent value="municipality" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <MunicipalityForm />
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
       
       {selectedComplaint && (
