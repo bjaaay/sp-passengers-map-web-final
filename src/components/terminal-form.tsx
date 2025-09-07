@@ -18,11 +18,14 @@ import { database } from "@/lib/firebase";
 import { ref, push, onValue } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
+// Updated schema: imageUrl is now a non-empty string for the base64 data URL.
 const formSchema = z.object({
   municipality: z.string().min(1, { message: "Municipality is required." }),
   terminalName: z.string().min(1, { message: "Terminal name is required." }),
   address: z.string().min(1, { message: "Address is required." }),
+  imageUrl: z.string().min(1, { message: "An image is required." }),
 });
 
 interface Municipality {
@@ -33,12 +36,15 @@ interface Municipality {
 export function TerminalForm() {
   const { toast } = useToast();
   const [municipalities, setMunicipalities] = useState<Municipality[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       municipality: "",
       terminalName: "",
       address: "",
+      imageUrl: "",
     },
   });
 
@@ -63,9 +69,11 @@ export function TerminalForm() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const terminalsRef = ref(database, `municipalities/${values.municipality}/terminals`);
+      // The imageUrl is now the base64 string from the form state
       await push(terminalsRef, {
         name: values.terminalName,
         address: values.address,
+        imageUrl: values.imageUrl,
       });
 
       toast({
@@ -73,6 +81,7 @@ export function TerminalForm() {
         description: "Terminal information has been saved.",
       });
       form.reset();
+      setImagePreview(null); // Clear the image preview
     } catch (error) {
       console.error("Error saving terminal information:", error);
       toast({
@@ -86,6 +95,7 @@ export function TerminalForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Municipality, Terminal Name, and Address fields remain the same... */}
         <FormField
           control={form.control}
           name="municipality"
@@ -134,6 +144,46 @@ export function TerminalForm() {
             </FormItem>
           )}
         />
+
+        {/* Updated Image Field */}
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Terminal Image</FormLabel>
+              <FormControl>
+                <Input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        const base64String = reader.result as string;
+                        // Set the base64 string as the field value
+                        field.onChange(base64String);
+                        // Update the preview
+                        setImagePreview(base64String);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="mt-4 w-full flex justify-center">
+             <Image src={imagePreview} alt="Image Preview" width={200} height={200} style={{ objectFit: 'cover', borderRadius: '8px' }} />
+          </div>
+        )}
+
         <Button type="submit">Save Terminal</Button>
       </form>
     </Form>
