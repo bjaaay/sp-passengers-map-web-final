@@ -39,6 +39,11 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
+const TRACCAR_URL = "https://traccar.live-vehicles.site/api/devices";
+const TRACCAR_AUTH = "Basic " + btoa("johvalenzuela@gbox.adnu.edu.ph:admin.Traccar");
+
+
+
 export function RegisterVehicleForm() {
   const { toast } = useToast();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -68,6 +73,23 @@ export function RegisterVehicleForm() {
 
       const dbRef = ref(database, `vehicles/${vehicleData.plateNumber}`);
       await set(dbRef, vehicleData);
+
+      const traccarResponse = await fetch(TRACCAR_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": TRACCAR_AUTH,
+        },
+        body: JSON.stringify({
+          name: vehicleData.plateNumber,
+          uniqueId: vehicleData.gpsTrackerId,
+        }),
+      });
+ 
+      if (!traccarResponse.ok) {
+        throw new Error("Failed to add device to Traccar");
+      }
+
 
       setSuccessMessage(`Vehicle with plate number ${vehicleData.plateNumber} has been successfully registered.`);
       form.reset();
@@ -106,7 +128,7 @@ export function RegisterVehicleForm() {
               name="gpsTrackerId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>GPS Tracker ID</FormLabel>
+                  <FormLabel>GPS ID</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter GPS Tracker ID" {...field} />
                   </FormControl>
