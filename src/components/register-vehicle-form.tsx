@@ -17,10 +17,17 @@ import { ImageUploadPlaceholder } from "./image-upload-placeholder"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import { useToast } from "@/hooks/use-toast"
 import { database } from "@/lib/firebase"
-import { ref, set } from "firebase/database"
+import { ref, set, get, query, equalTo, orderByChild } from "firebase/database"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
 import { Terminal } from "lucide-react"
+
+const checkGpsIdUniqueness = async (gpsTrackerId: string) => {
+  const vehiclesRef = ref(database, 'vehicles');
+  const q = query(vehiclesRef, orderByChild('gpsTrackerId'), equalTo(gpsTrackerId));
+  const snapshot = await get(q);
+  return !snapshot.exists();
+};
 
 const formSchema = z.object({
   gpsTrackerId: z.string().min(1, "GPS Tracker ID is required."),
@@ -28,6 +35,12 @@ const formSchema = z.object({
   plateNumber: z.string().min(1, "Vehicle Plate No. is required.").regex(/^[A-Z0-9]+$/, "Plate number should only contain letters and numbers."),
   cor: z.any().refine(file => file, "Certificate of Registration is required."),
   or: z.any().refine(file => file, "Official Receipt is required."),
+}).refine(async (data) => {
+  const isUnique = await checkGpsIdUniqueness(data.gpsTrackerId);
+  return isUnique;
+}, {
+  message: "GPS Tracker ID already exists.",
+  path: ["gpsTrackerId"],
 });
 
 const fileToBase64 = (file: File): Promise<string> => {

@@ -94,7 +94,7 @@ export function VehicleList() {
       },
       cell: ({ row }) => {
         const date = new Date(row.getValue("registrationDate"))
-        return <div className="text-left font-medium">{format(date, "PPP")}</div>
+        return <div className="text-left font-medium">{format(date, "MMMM d, yyyy")}</div>
       },
     },
     {
