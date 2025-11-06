@@ -11,13 +11,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PassengersMapLogo } from "@/components/icons";
 import { Eye, EyeOff } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -27,7 +20,6 @@ import { ref, set } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  office: z.string({ required_error: "Please select an office." }),
   firstName: z.string().min(1, { message: "First name is required." }),
   lastName: z.string().min(1, { message: "Last name is required." }),
   username: z.string().min(1, { message: "Username is required." }),
@@ -68,7 +60,7 @@ export function SignUpForm() {
         email: values.email,
         firstName: values.firstName,
         lastName: values.lastName,
-        office: values.office,
+        office: "PSO",
       });
 
       toast({
@@ -102,27 +94,6 @@ export function SignUpForm() {
               <h2 className="text-2xl font-semibold text-center text-primary mb-6">Sign Up</h2>
               <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="office"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Select Office</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Office" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="PSO">Public Safety Office (PSO)</SelectItem>
-                          <SelectItem value="LTFRB">Land Transportation Franchising and Regulatory Board (LTFRB)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}

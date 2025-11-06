@@ -47,7 +47,7 @@ export function LoginForm() {
 
       if (snapshot.exists()) {
         const userData = snapshot.val();
-        const allowedOffices = ['PSO', 'LTFRB'];
+        const allowedOffices = ['PSO'];
         
         if (userData.office && allowedOffices.includes(userData.office)) {
           toast({
@@ -55,11 +55,8 @@ export function LoginForm() {
             description: "Welcome back!",
           });
           
-          if (userData.office === 'LTFRB') {
-            router.push("/ltfrb-dashboard");
-          } else {
-            router.push("/dashboard");
-          }
+          router.push("/dashboard");
+
         } else {
           await signOut(auth);
           toast({

@@ -1,68 +1,57 @@
 
-"use client";
+"use client"
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Complaint } from '@/lib/types';
-import { ComplaintCard } from './complaint-card';
-import { ComplaintDetailsDialog } from './complaint-details-dialog';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search, UserCircle, LogOut, Settings } from 'lucide-react';
-import { DatePicker } from './date-picker';
-import { AnimatePresence, motion } from 'framer-motion';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import Link from 'next/link';
-import { database, auth } from '@/lib/firebase';
-import { ref, onValue, update, remove } from 'firebase/database';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ComplaintCard } from "@/components/complaint-card"
+import { RegisterVehicleForm } from "@/components/register-vehicle-form"
+import { VehicleList } from "./vehicle-list";
+import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { UserCircle, LogOut, Search } from "lucide-react";
+import Link from "next/link";
+import { signOut, User } from "firebase/auth";
+import { auth, database } from "@/lib/firebase";
+import { ref, onValue, update, remove } from "firebase/database";
+import { useRouter } from "next/navigation";
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { DatePicker } from './date-picker';
+import type { Complaint } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { MunicipalContactsForm } from "./municipal-contacts-form";
 import { TerminalForm } from "./terminal-form";
 import { MunicipalityForm } from "./municipality-form";
+import { ComplaintDetailsDialog } from './complaint-details-dialog';
 
 interface UserData {
   firstName: string;
   lastName: string;
-  office: 'PSO' | 'LTFRB';
+  office: 'PSO';
   profilePictureUrl?: string;
 }
 
-interface ComplaintDashboardProps {
-  complaints?: Complaint[];
-  onStatusChange?: (id: string, status: 'New' | 'Review' | 'Resolved') => void;
-  onDelete?: (complaint: Complaint) => void;
-  isEmbedded?: boolean;
-}
-
-export function ComplaintDashboard({ complaints: initialComplaints, onStatusChange, onDelete, isEmbedded = false }: ComplaintDashboardProps) {
-  const [complaints, setComplaints] = useState<Complaint[]>(initialComplaints || []);
+export function ComplaintDashboard() {
+  const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [complaintToDelete, setComplaintToDelete] = useState<Complaint | null>(null);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
-  const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [complaintToDelete, setComplaintToDelete] = useState<Complaint | null>(null);
+  
   const router = useRouter();
   const { toast } = useToast();
 
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+       if (user) {
         setCurrentUser(user);
         const userRef = ref(database, `users/${user.uid}`);
         onValue(userRef, (snapshot) => {
@@ -70,23 +59,15 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
             setUserData(snapshot.val());
           }
         });
-      } else if (!isEmbedded) { // Don't redirect if it's part of another dashboard
+      } else {
         router.push('/');
       }
     });
-
     return () => unsubscribe();
-  }, [router, isEmbedded]);
-
+  }, [router]);
+  
   useEffect(() => {
-    // If complaints are passed as props, use them directly.
-    if (initialComplaints) {
-      setComplaints(initialComplaints);
-      return;
-    }
-    
-    // Otherwise, fetch them if this is not an embedded component.
-    if (!currentUser || isEmbedded) return;
+    if (!currentUser) return;
 
     const reportsRef = ref(database, 'reports');
 
@@ -94,7 +75,6 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
       const allReports = snapshot.val();
       if (allReports) {
         const loadedComplaints: Complaint[] = [];
-        // The data is nested by user ID, then by report ID
         Object.keys(allReports).forEach(userId => {
           const userReports = allReports[userId];
           Object.keys(userReports).forEach(reportId => {
@@ -129,7 +109,7 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
 
     return () => unsubscribe();
 
-  }, [currentUser, toast, isEmbedded, initialComplaints]);
+  }, [currentUser, toast]);
 
 
   const handleLogout = async () => {
@@ -138,10 +118,6 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
   };
 
   const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
-    if (onStatusChange) {
-      onStatusChange(id, status);
-      return;
-    }
     const complaintToUpdate = complaints.find(c => c.id === id);
     if (complaintToUpdate && complaintToUpdate.userId) {
       const reportRef = ref(database, `reports/${complaintToUpdate.userId}/${id}`);
@@ -174,11 +150,7 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
     }
   };
 
-  const internalFilteredComplaints = useMemo(() => {
-     if (isEmbedded) {
-      // If embedded, the parent component handles filtering.
-      return complaints;
-    }
+   const filteredComplaints = useMemo(() => {
     return complaints.filter(complaint => {
       const searchMatch =
         searchTerm === '' ||
@@ -193,157 +165,129 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
       
       return searchMatch && statusMatch && vehicleMatch && dateMatch;
     });
-  }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, dateFilter, isEmbedded]);
+  }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, dateFilter]);
 
-  const handleDeleteClick = (complaint: Complaint) => {
-    if (onDelete) {
-      onDelete(complaint);
-    } else {
-      setComplaintToDelete(complaint);
-    }
+
+  if (!currentUser || !userData) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
-
-  if (!isEmbedded && (!currentUser || !userData)) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  const complaintsToRender = isEmbedded ? initialComplaints || [] : internalFilteredComplaints;
 
   return (
-    <div className="flex flex-col h-full">
-      {!isEmbedded && (
-        <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold tracking-tight">
+    <div className="flex flex-col h-full bg-background">
+       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+               <h1 className="text-2xl font-bold tracking-tight">
                   <span className="text-green-500">Passengers</span>
                   <span className="text-blue-500"> Map</span>
                 </h1>
-              </div>
-              <div className="flex items-center gap-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                         <AvatarImage src={userData?.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser?.uid}`} alt="@user" />
-                        <AvatarFallback>{userData?.firstName?.[0]}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
+            </div>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser?.uid}`} alt="@user" />
+                    <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userData?.firstName} {userData?.lastName}</p>
+                        <p className="text-sm font-medium leading-none">{userData.firstName} {userData.lastName}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          {userData?.office === 'PSO' ? 'Public Safety Office' : 'LTFRB Office'}
+                          Public Safety Office
                         </p>
                       </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                     <DropdownMenuItem asChild>
-                        <Link href="/profile">
-                          <UserCircle className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                 <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+           </div>
+         </div>
+       </header>
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs defaultValue="complaints" className="w-full">
+          <TabsList className="grid w-full grid-cols-6 max-w-4xl mx-auto">
+            <TabsTrigger value="complaints">Complaints</TabsTrigger>
+            <TabsTrigger value="register-vehicle">Register Vehicle</TabsTrigger>
+            <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
+            <TabsTrigger value="municipal-contacts">Municipal Contacts</TabsTrigger>
+            <TabsTrigger value="terminals">Terminals</TabsTrigger>
+            <TabsTrigger value="municipality">Municipality</TabsTrigger>
+          </TabsList>
+          <TabsContent value="complaints" className="mt-6">
+            <div className="py-4 border-b flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by license plate or description..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 sm:flex gap-2">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[150px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Statuses</SelectItem>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="Review">Review</SelectItem>
+                    <SelectItem value="Resolved">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
+                  <SelectTrigger className="w-full sm:w-[150px]">
+                    <SelectValue placeholder="Vehicle Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Vehicles</SelectItem>
+                    <SelectItem value="Jeepney">Jeepney</SelectItem>
+                    <SelectItem value="Tricycle">Tricycle</SelectItem>
+                    <SelectItem value="E-trike">E-trike</SelectItem>
+                    <SelectItem value="Modern PUV">Modern PUV</SelectItem>
+                    <SelectItem value="UV Express">UV Express</SelectItem>
+                  </SelectContent>
+                </Select>
+                 <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
               </div>
             </div>
-          </div>
-        </header>
-      )}
-
-      <main className={cn("flex-grow", !isEmbedded && "container mx-auto px-4 sm:px-6 lg:px-8 py-8")}>
-         <Tabs defaultValue="complaints" className="w-full">
-           {!isEmbedded && (
-              <TabsList className="grid w-full grid-cols-4 max-w-xl mx-auto">
-                <TabsTrigger value="complaints">Complaints</TabsTrigger>
-                <TabsTrigger value="municipal-contacts">Municipal Contacts</TabsTrigger>
-                <TabsTrigger value="terminals">Terminals</TabsTrigger>
-                <TabsTrigger value="municipality">Municipality</TabsTrigger>
-              </TabsList>
-           )}
-          <TabsContent value="complaints" className="mt-6">
-             {!isEmbedded && (
-               <div className="py-4 border-b flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-grow">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by license plate or description..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
+            <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredComplaints.map((complaint) => (
+                  <ComplaintCard
+                    key={complaint.id}
+                    complaint={complaint}
+                    onStatusChange={updateReportStatus}
+                    onDelete={() => setComplaintToDelete(complaint)}
+                    onViewDetails={() => setSelectedComplaint(complaint)}
                   />
-                </div>
-                <div className="grid grid-cols-2 sm:flex gap-2">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[150px]">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="All">All Statuses</SelectItem>
-                      <SelectItem value="New">New</SelectItem>
-                      <SelectItem value="Review">Review</SelectItem>
-                      <SelectItem value="Resolved">Resolved</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
-                    <SelectTrigger className="w-full sm:w-[150px]">
-                      <SelectValue placeholder="Vehicle Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="All">All Vehicles</SelectItem>
-                      <SelectItem value="Jeepney">Jeepney</SelectItem>
-                      <SelectItem value="Tricycle">Tricycle</SelectItem>
-                      <SelectItem value="E-trike">E-trike</SelectItem>
-                      <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                      <SelectItem value="UV Express">UV Express</SelectItem>
-                    </SelectContent>
-                  </Select>
-                   <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
-                </div>
-              </div>
-            )}
-            <AnimatePresence>
-              <motion.div 
-                layout
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              >
-                {complaintsToRender.map(complaint => (
-                   <motion.div layout key={complaint.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
-                    <ComplaintCard
-                      complaint={complaint}
-                      onStatusChange={updateReportStatus}
-                      onViewDetails={() => setSelectedComplaint(complaint)}
-                      onDelete={() => handleDeleteClick(complaint)}
-                    />
-                  </motion.div>
                 ))}
-              </motion.div>
-            </AnimatePresence>
-            {complaintsToRender.length === 0 && (
-              <div className="text-center py-16 text-muted-foreground">
-                <p className="text-lg font-medium">No complaints found.</p>
-                <p>Try adjusting your filters or search term.</p>
               </div>
-            )}
           </TabsContent>
-           <TabsContent value="municipal-contacts" className="mt-6">
+          <TabsContent value="register-vehicle" className="mt-6">
+            <div className="max-w-2xl mx-auto">
+              <RegisterVehicleForm />
+            </div>
+          </TabsContent>
+           <TabsContent value="vehicles" className="mt-6">
+            <VehicleList />
+          </TabsContent>
+          <TabsContent value="municipal-contacts" className="mt-6">
             <div className="max-w-2xl mx-auto">
               <MunicipalContactsForm />
             </div>
@@ -360,21 +304,8 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
           </TabsContent>
         </Tabs>
       </main>
-      
-      {selectedComplaint && (
-        <ComplaintDetailsDialog
-          complaint={selectedComplaint}
-          isOpen={!!selectedComplaint}
-          onOpenChange={(isOpen) => {
-            if (!isOpen) {
-              setSelectedComplaint(null);
-            }
-          }}
-          onStatusChange={updateReportStatus}
-        />
-      )}
 
-      {!isEmbedded && <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
+       <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -388,8 +319,16 @@ export function ComplaintDashboard({ complaints: initialComplaints, onStatusChan
             <AlertDialogAction onClick={handleDeleteComplaint}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>}
-      
+      </AlertDialog>
+
+      {selectedComplaint && (
+        <ComplaintDetailsDialog
+          isOpen={!!selectedComplaint}
+          onOpenChange={(open) => !open && setSelectedComplaint(null)}
+          complaint={selectedComplaint}
+          onStatusChange={updateReportStatus}
+        />
+      )}
     </div>
-  );
+  )
 }
