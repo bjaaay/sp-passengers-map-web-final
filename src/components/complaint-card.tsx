@@ -88,13 +88,13 @@ export function ComplaintCard({ complaint, onStatusChange, onViewDetails, onDele
       <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-2">
         <Button variant="outline" size="sm" onClick={onViewDetails}>
           <MessageSquareText className="mr-2 h-4 w-4" />
-          Details
+          View
         </Button>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={complaint.status === 'Resolved'}>
-              Change Status
+              Update Status
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[180px]">
