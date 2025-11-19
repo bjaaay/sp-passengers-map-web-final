@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -36,6 +35,7 @@ const formSchema = z.object({
   cor: z.any().refine(file => file, "Certificate of Registration is required."),
   or: z.any().refine(file => file, "Official Receipt is required."),
 }).refine(async (data) => {
+  if (!data.gpsTrackerId) return true; // Don't validate if empty, other rule will catch
   const isUnique = await checkGpsIdUniqueness(data.gpsTrackerId);
   return isUnique;
 }, {
@@ -66,6 +66,8 @@ export function RegisterVehicleForm() {
     defaultValues: {
       gpsTrackerId: "",
       plateNumber: "",
+      cor: null,
+      or: null
     },
   });
 
@@ -100,19 +102,21 @@ export function RegisterVehicleForm() {
       });
  
       if (!traccarResponse.ok) {
-        throw new Error("Failed to add device to Traccar");
+        const errorData = await traccarResponse.json();
+        console.error("Traccar API error:", errorData)
+        throw new Error("Failed to add device to Traccar. The device may already be registered in Traccar.");
       }
 
 
       setSuccessMessage(`Vehicle with plate number ${vehicleData.plateNumber} has been successfully registered.`);
       form.reset();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering vehicle:", error);
       toast({
         variant: "destructive",
         title: "Registration Failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: error.message || "An unexpected error occurred. Please try again.",
       });
     }
   };
@@ -121,7 +125,7 @@ export function RegisterVehicleForm() {
     <div className="flex flex-col h-full">
       <main className="flex-1 bg-card p-6 rounded-lg shadow-md">
         {!form.formState.isSubmitSuccessful && (
-           <p className="text-sm text-red-500 mb-4">*The following details are required before becoming verified*</p>
+           <p className="text-sm text-red-500 mb-4">*All fields are required for verification*</p>
         )}
 
         {successMessage && (
@@ -199,6 +203,7 @@ export function RegisterVehicleForm() {
                       id="cor-upload"
                       label="Certificate Of Registration"
                       onFileChange={(file) => field.onChange(file)}
+                      value={field.value}
                     />
                     <FormMessage className="pl-1"/>
                   </FormItem>
@@ -214,6 +219,7 @@ export function RegisterVehicleForm() {
                       id="or-upload"
                       label="Latest Official Receipt"
                       onFileChange={(file) => field.onChange(file)}
+                      value={field.value}
                     />
                     <FormMessage className="pl-1"/>
                   </FormItem>

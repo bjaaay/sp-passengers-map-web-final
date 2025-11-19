@@ -24,7 +24,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { MunicipalContactsForm } from "./municipal-contacts-form";
 import { TerminalForm } from "./terminal-form";
 import { MunicipalityForm } from "./municipality-form";
-import { ComplaintDetailsDialog } from './complaint-details-dialog';
 
 interface UserData {
   firstName: string;
@@ -38,8 +37,6 @@ export function ComplaintDashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [complaintToDelete, setComplaintToDelete] = useState<Complaint | null>(null);
-  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
-
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -91,6 +88,7 @@ export function ComplaintDashboard() {
               incidentDate: reportData.date || 'No Date',
               description: reportData.description || 'No Description',
               status: reportData.status || 'New',
+              submittedDate: reportData.submittedDate || new Date().toLocaleDateString(),
             });
           });
         });
@@ -274,7 +272,6 @@ export function ComplaintDashboard() {
                     complaint={complaint}
                     onStatusChange={updateReportStatus}
                     onDelete={() => setComplaintToDelete(complaint)}
-                    onViewDetails={() => setSelectedComplaint(complaint)}
                   />
                 ))}
               </div>
@@ -320,15 +317,6 @@ export function ComplaintDashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {selectedComplaint && (
-        <ComplaintDetailsDialog
-          isOpen={!!selectedComplaint}
-          onOpenChange={(open) => !open && setSelectedComplaint(null)}
-          complaint={selectedComplaint}
-          onStatusChange={updateReportStatus}
-        />
-      )}
     </div>
   )
 }

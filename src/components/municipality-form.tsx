@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
 const formSchema = z.object({
-  municipalityName: z.string().min(1, { message: "Municipality name is required." }),
+  municipalityName: z.string().min(1, { message: "City or Municipality name is required." }),
 });
 
 export function MunicipalityForm() {
@@ -50,7 +50,7 @@ export function MunicipalityForm() {
     if (existingMunicipality) {
       toast({
         variant: "destructive",
-        title: "Duplicate Municipality",
+        title: "Duplicate City or Municipality",
         description: `"${values.municipalityName}" already exists.`,
       });
       return; 
@@ -62,15 +62,15 @@ export function MunicipalityForm() {
 
       toast({
         title: "Success",
-        description: "Municipality has been saved.",
+        description: "City or Municipality has been saved.",
       });
       form.reset();
     } catch (error) {
-      console.error("Error saving municipality:", error);
+      console.error("Error saving city or municipality:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save municipality.",
+        description: "Failed to save city or municipality.",
       });
     }
   };
@@ -79,8 +79,8 @@ export function MunicipalityForm() {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>Add New Municipality</CardTitle>
-           <CardDescription>Enter the name of a new municipality to add to the system.</CardDescription>
+          <CardTitle>Add New City or Municipality</CardTitle>
+           <CardDescription>Enter the name of a new city or municipality to add to the system.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -90,15 +90,15 @@ export function MunicipalityForm() {
                 name="municipalityName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Municipality Name</FormLabel>
+                    <FormLabel>City or Municipality Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter municipality name" {...field} />
+                      <Input placeholder="Enter city or municipality name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Save Municipality</Button>
+              <Button type="submit">Save City or Municipality</Button>
             </form>
           </Form>
         </CardContent>
@@ -106,8 +106,8 @@ export function MunicipalityForm() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Existing Municipalities</CardTitle>
-           <CardDescription>This is a list of municipalities already in the system.</CardDescription>
+          <CardTitle>Existing Cities or Municipalities</CardTitle>
+           <CardDescription>This is a list of cities or municipalities already in the system.</CardDescription>
         </CardHeader>
         <CardContent>
           {municipalities.length > 0 ? (
@@ -119,7 +119,7 @@ export function MunicipalityForm() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No municipalities added yet.</p>
+            <p className="text-sm text-muted-foreground">No cities or municipalities added yet.</p>
           )}
         </CardContent>
       </Card>

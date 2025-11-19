@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { Trash } from "lucide-react";
 
 const formSchema = z.object({
-  municipality: z.string().min(1, { message: "Municipality is required." }),
+  municipality: z.string().min(1, { message: "City or Municipality is required." }),
   emergency_hotlines: z.array(z.object({
     name: z.string().min(1, { message: "Hotline name is required." }),
     number: z.string().min(1, { message: "Hotline number is required." }),
@@ -88,15 +88,15 @@ export function MunicipalContactsForm() {
 
       toast({
         title: "Success",
-        description: "Municipal contacts have been saved.",
+        description: "City or Municipal contacts have been saved.",
       });
       form.reset();
     } catch (error) {
-      console.error("Error saving municipal contacts:", error);
+      console.error("Error saving city or municipal contacts:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save municipal contacts.",
+        description: "Failed to save city or municipal contacts.",
       });
     }
   };
@@ -109,11 +109,11 @@ export function MunicipalContactsForm() {
           name="municipality"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Municipality</FormLabel>
+              <FormLabel>City or Municipality</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a municipality" />
+                    <SelectValue placeholder="Select a city or municipality" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

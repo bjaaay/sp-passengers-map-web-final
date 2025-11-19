@@ -10,6 +10,7 @@ export type Complaint = {
   incidentDate: string;
   description: string;
   status: 'New' | 'Review' | 'Resolved';
+  submittedDate: string;
 };
 
 export type Vehicle = {

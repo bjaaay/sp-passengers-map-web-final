@@ -13,11 +13,11 @@ import { TricycleIcon } from './tricycle-icon';
 import { ETrikeIcon } from './e-trike-icon';
 import { ModernPuvIcon } from './modern-puv-icon';
 import { UvExpressIcon } from './uv-express-icon';
+import Link from 'next/link';
 
 interface ComplaintCardProps {
   complaint: Complaint;
   onStatusChange: (id: string, status: 'New' | 'Review' | 'Resolved') => void;
-  onViewDetails: () => void;
   onDelete: (id: string) => void;
 }
 
@@ -36,59 +36,70 @@ const statusConfig: Record<string, { icon: React.ReactNode; color: string; borde
     Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300', borderColor: 'border-gray-200 dark:border-gray-800' },
 }
 
-export function ComplaintCard({ complaint, onStatusChange, onViewDetails, onDelete }: ComplaintCardProps) {
+export function ComplaintCard({ complaint, onStatusChange, onDelete }: ComplaintCardProps) {
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
   const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
   const isDataUrl = complaint.incidentPhotoUrl && complaint.incidentPhotoUrl.startsWith('data:image');
-  
+  const viewUrl = `/dashboard/complaint?id=${complaint.id}`;
+
   return (
     <Card className={cn(
       "flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1",
       currentStatusConfig.borderColor,
       complaint.status === 'Resolved' ? 'bg-green-50/50 dark:bg-green-950/50' : ''
     )}>
-       <CardHeader className="p-4 cursor-pointer" onClick={onViewDetails}>
-        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
-           {isDataUrl ? (
-            <Image
-              src={complaint.incidentPhotoUrl}
-              alt={`Incident involving ${complaint.licensePlate}`}
-              fill
-              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"
-              className="object-cover"
-            />
-           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
-              <ImageOff className="h-10 w-10 text-muted-foreground" />
-              <p className="mt-2 text-sm text-muted-foreground">No photo provided</p>
-            </div>
-           )}
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow p-4 pt-0 cursor-pointer" onClick={onViewDetails}>
-        <div className="mb-2 flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold leading-none tracking-tight">{complaint.licensePlate}</CardTitle>
-          <Badge variant={'outline'} className={cn(
-            "border-transparent",
-            currentStatusConfig.color
-          )}>
-            {currentStatusConfig.icon}
-            {statusLabel}
-          </Badge>
-        </div>
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            {vehicleIcon}
-            <span>{complaint.vehicleType}</span>
+      <Link href={viewUrl}>
+        <CardHeader className="p-4 cursor-pointer">
+          <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+             {isDataUrl ? (
+              <Image
+                src={complaint.incidentPhotoUrl}
+                alt={`Incident involving ${complaint.licensePlate}`}
+                fill
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"
+                className="object-cover"
+              />
+             ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
+                <ImageOff className="h-10 w-10 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">No photo provided</p>
+              </div>
+             )}
           </div>
-          <p className="line-clamp-2">{complaint.description}</p>
-        </div>
-      </CardContent>
+        </CardHeader>
+        <CardContent className="flex-grow p-4 pt-0 cursor-pointer">
+          <div className="mb-2 flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold leading-none tracking-tight">{complaint.licensePlate}</CardTitle>
+            <Badge variant={'outline'} className={cn(
+              "border-transparent",
+              currentStatusConfig.color
+            )}>
+              {currentStatusConfig.icon}
+              {statusLabel}
+            </Badge>
+          </div>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              {vehicleIcon}
+              <span>{complaint.vehicleType}</span>
+            </div>
+            <div>
+              <p className="line-clamp-2">{complaint.description}</p>
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+              <p><strong>Submitted Date:</strong> {complaint.submittedDate}</p>
+              <p><strong>Incident Time & Date:</strong> {complaint.incidentTime} {complaint.incidentDate}</p>
+            </div>
+          </div>
+        </CardContent>
+       </Link>
       <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" onClick={onViewDetails}>
-          <MessageSquareText className="mr-2 h-4 w-4" />
-          View
+        <Button variant="outline" size="sm" asChild>
+          <Link href={viewUrl}>
+            <MessageSquareText className="mr-2 h-4 w-4" />
+            View
+          </Link>
         </Button>
         
         <DropdownMenu>

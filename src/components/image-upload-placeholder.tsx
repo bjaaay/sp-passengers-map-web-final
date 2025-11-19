@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Link, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
@@ -10,6 +10,7 @@ interface ImageUploadPlaceholderProps {
   label: string
   onFileChange: (file: File | null) => void
   className?: string
+  value?: File | null
 }
 
 export function ImageUploadPlaceholder({
@@ -17,9 +18,21 @@ export function ImageUploadPlaceholder({
   label,
   onFileChange,
   className,
+  value,
 }: ImageUploadPlaceholderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (value) {
+      const objectUrl = URL.createObjectURL(value)
+      setImagePreview(objectUrl)
+
+      return () => URL.revokeObjectURL(objectUrl)
+    } else {
+      setImagePreview(null)
+    }
+  }, [value])
 
   const handleContainerClick = () => {
     if (!imagePreview) {
@@ -30,16 +43,10 @@ export function ImageUploadPlaceholder({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null
     onFileChange(file)
-    if (file) {
-      setImagePreview(URL.createObjectURL(file))
-    } else {
-      setImagePreview(null)
-    }
   }
 
   const handleRemoveImage = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
-    setImagePreview(null)
     onFileChange(null)
     if (inputRef.current) {
       inputRef.current.value = ""
