@@ -167,11 +167,11 @@ export function RegisterVehicleForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Jeepney">Jeepney</SelectItem>
-                      <SelectItem value="Tricycle">Tricycle</SelectItem>
-                      <SelectItem value="E-trike">E-trike</SelectItem>
-                      <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                      <SelectItem value="UV Express">UV Express</SelectItem>
+                      <SelectItem value="jeepney">Jeepney</SelectItem>
+                      <SelectItem value="tricycle">Tricycle</SelectItem>
+                      <SelectItem value="etrike">E-trike</SelectItem>
+                      <SelectItem value="modern_puv">Modern PUV</SelectItem>
+                      <SelectItem value="uv_express">UV Express</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

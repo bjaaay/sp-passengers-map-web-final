@@ -16,8 +16,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { auth, database } from "@/lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import { ref, set, get, query, orderByChild, equalTo } from "firebase/database";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { municipalities } from "@/lib/municipalities";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required." }),
@@ -26,6 +28,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string(),
+  municipality: z.string().min(1, { message: "Please select a city/municipality." }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match.",
   path: ["confirmPassword"],
@@ -47,11 +50,25 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      municipality: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const usersRef = ref(database, 'users');
+      const municipalityQuery = query(usersRef, orderByChild('municipality'), equalTo(values.municipality));
+      const snapshot = await get(municipalityQuery);
+
+      if (snapshot.exists()) {
+        toast({
+          variant: "destructive",
+          title: "Sign Up Failed",
+          description: "A PSO account for this city/municipality already exists.",
+        });
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
@@ -61,6 +78,7 @@ export function SignUpForm() {
         firstName: values.firstName,
         lastName: values.lastName,
         office: "PSO",
+        municipality: values.municipality,
       });
 
       toast({
@@ -136,6 +154,28 @@ export function SignUpForm() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl><Input placeholder="Email" {...field} autoComplete="email" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="municipality"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City/Municipality</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a city/municipality" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {municipalities.map(municipality => (
+                              <SelectItem key={municipality} value={municipality}>{municipality}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

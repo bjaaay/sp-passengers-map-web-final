@@ -14,6 +14,7 @@ import { ETrikeIcon } from './e-trike-icon';
 import { ModernPuvIcon } from './modern-puv-icon';
 import { UvExpressIcon } from './uv-express-icon';
 import Link from 'next/link';
+import { format, isValid, parse } from 'date-fns';
 
 interface ComplaintCardProps {
   complaint: Complaint;
@@ -42,6 +43,21 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
   const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
   const isDataUrl = complaint.incidentPhotoUrl && complaint.incidentPhotoUrl.startsWith('data:image');
   const viewUrl = `/dashboard/complaint?id=${complaint.id}`;
+
+  let formattedSubmittedDate = "Not available";
+  if (complaint.submittedDate && complaint.submittedDate !== 'No Date') {
+      try {
+          const dateObj = new Date(complaint.submittedDate);
+          if (isValid(dateObj)) {
+              formattedSubmittedDate = format(dateObj, "MMM dd, yyyy");
+          } else {
+              const parsedDate = parse(complaint.submittedDate, "M/d/yyyy", new Date());
+              if (isValid(parsedDate)) {
+                  formattedSubmittedDate = format(parsedDate, "MMM dd, yyyy");
+              }
+          }
+      } catch (e) {}
+  }
 
   return (
     <Card className={cn(
@@ -88,8 +104,8 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
               <p className="line-clamp-2">{complaint.description}</p>
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-              <p><strong>Submitted Date:</strong> {complaint.submittedDate}</p>
-              <p><strong>Incident Time & Date:</strong> {complaint.incidentTime} {complaint.incidentDate}</p>
+              <p><strong>Submitted:</strong> {formattedSubmittedDate}</p>
+              <p><strong>Incident:</strong> {complaint.incidentTime} {complaint.incidentDate}</p>
             </div>
           </div>
         </CardContent>

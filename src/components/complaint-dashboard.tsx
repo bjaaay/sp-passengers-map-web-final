@@ -77,6 +77,14 @@ export function ComplaintDashboard() {
           Object.keys(userReports).forEach(reportId => {
             const reportData = userReports[reportId];
             const imageUrl = (reportData.images && Array.isArray(reportData.images) && reportData.images.length > 0) ? reportData.images[0] : '';
+            
+            let finalSubmittedDate = 'No Date';
+            if (reportData.timestamp) {
+                finalSubmittedDate = new Date(reportData.timestamp).toLocaleDateString();
+            } else if (reportData.date) {
+                finalSubmittedDate = reportData.date;
+            }
+
             loadedComplaints.push({
               id: reportId,
               userId: userId,
@@ -88,7 +96,7 @@ export function ComplaintDashboard() {
               incidentDate: reportData.date || 'No Date',
               description: reportData.description || 'No Description',
               status: reportData.status || 'New',
-              submittedDate: reportData.submittedDate || new Date().toLocaleDateString(),
+              submittedDate: finalSubmittedDate,
             });
           });
         });
@@ -148,6 +156,10 @@ export function ComplaintDashboard() {
     }
   };
 
+  const normalizeVehicleType = (vehicleType: string): string => {
+    return vehicleType.toLowerCase().replace(/-/g, "").replace(/ /g, "_");
+  };
+
    const filteredComplaints = useMemo(() => {
     return complaints.filter(complaint => {
       const searchMatch =
@@ -156,9 +168,8 @@ export function ComplaintDashboard() {
         complaint.description.toLowerCase().includes(searchTerm.toLowerCase());
       const statusMatch =
         statusFilter === 'All' || complaint.status === statusFilter;
-      const vehicleMatch =
-        vehicleTypeFilter === 'All' || complaint.vehicleType === vehicleTypeFilter;
-      
+      const vehicleMatch = vehicleTypeFilter === 'All' || normalizeVehicleType(complaint.vehicleType) === vehicleTypeFilter;
+
       const dateMatch = !dateFilter || (complaint.incidentDate && new Date(complaint.incidentDate).toDateString() === dateFilter.toDateString());
       
       return searchMatch && statusMatch && vehicleMatch && dateMatch;
@@ -255,11 +266,11 @@ export function ComplaintDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="All">All Vehicles</SelectItem>
-                    <SelectItem value="Jeepney">Jeepney</SelectItem>
-                    <SelectItem value="Tricycle">Tricycle</SelectItem>
-                    <SelectItem value="E-trike">E-trike</SelectItem>
-                    <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                    <SelectItem value="UV Express">UV Express</SelectItem>
+                    <SelectItem value="jeepney">Jeepney</SelectItem>
+                    <SelectItem value="tricycle">Tricycle</SelectItem>
+                    <SelectItem value="etrike">E-trike</SelectItem>
+                    <SelectItem value="modern_puv">Modern PUV</SelectItem>
+                    <SelectItem value="uv_express">UV Express</SelectItem>
                   </SelectContent>
                 </Select>
                  <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />

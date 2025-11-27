@@ -46,7 +46,7 @@ function ComplaintDetailsContent() {
                     incidentDate: reportData.date || 'No Date',
                     description: reportData.description || 'No Description',
                     status: reportData.status || 'New',
-                    submittedDate: reportData.submittedDate || new Date().toLocaleDateString(),
+                    submittedDate: reportData.timestamp || reportData.date || 'No Date',
                 };
                 break; 
             }
