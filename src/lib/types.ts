@@ -2,7 +2,7 @@
 export type Complaint = {
   id: string;
   userId: string;
-  incidentPhotoUrl: string;
+  incidentPhotoUrls: string[];
   vehicleType: 'Jeepney' | 'Tricycle' | 'E-trike' | 'Modern PUV' | 'UV Express';
   licensePlate: string;
   route: string;

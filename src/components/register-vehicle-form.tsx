@@ -15,7 +15,7 @@ import {
 import { ImageUploadPlaceholder } from "./image-upload-placeholder"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import { useToast } from "@/hooks/use-toast"
-import { database } from "@/lib/firebase"
+import { auth, database } from "@/lib/firebase"
 import { ref, set, get, query, equalTo, orderByChild } from "firebase/database"
 import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
@@ -73,11 +73,21 @@ export function RegisterVehicleForm() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSuccessMessage(null);
+    if (!auth.currentUser) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to register a vehicle.",
+      });
+      return;
+    }
+
     try {
       const corBase64 = await fileToBase64(values.cor);
       const orBase64 = await fileToBase64(values.or);
 
       const vehicleData = {
+        userId: auth.currentUser.uid,
         gpsTrackerId: values.gpsTrackerId,
         vehicleType: values.vehicleType,
         plateNumber: values.plateNumber.toUpperCase(),

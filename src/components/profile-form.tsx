@@ -188,7 +188,7 @@ export function ProfileForm() {
                     <Card>
                         <CardContent className="p-6 text-center">
                             <Avatar className="h-28 w-28 border-4 border-white mx-auto mb-4">
-                                <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser.uid}`} />
+                                <AvatarImage src={userData.profilePictureUrl} />
                                 <AvatarFallback className="text-4xl">{userData.firstName?.[0]}{userData.lastName?.[0]}</AvatarFallback>
                             </Avatar>
                             <h2 className="text-2xl font-bold">{`${userData.firstName} ${userData.lastName}`}</h2>
@@ -404,5 +404,3 @@ export function ProfileForm() {
     </>
   );
 }
-
-    

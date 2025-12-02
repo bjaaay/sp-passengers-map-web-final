@@ -9,7 +9,7 @@ import { VehicleList } from "./vehicle-list";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { UserCircle, LogOut, Search } from "lucide-react";
+import { UserCircle, LogOut, Search, Inbox } from "lucide-react";
 import Link from "next/link";
 import { signOut, User } from "firebase/auth";
 import { auth, database } from "@/lib/firebase";
@@ -33,6 +33,15 @@ interface UserData {
   profilePictureUrl?: string;
   municipality?: string;
 }
+
+function getMunicipalitiesFromRoute(route: string): string[] {
+  if (!route) return [];
+  const lowerCaseRoute = route.toLowerCase();
+  return municipalities.filter(muni => 
+    lowerCaseRoute.includes(muni.toLowerCase())
+  );
+}
+
 
 export function ComplaintDashboard() {
   const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
@@ -65,15 +74,6 @@ export function ComplaintDashboard() {
     return () => unsubscribe();
   }, [router]);
   
-  const getMunicipalityFromRoute = (route: string) => {
-    for (const municipality of municipalities) {
-      if (route.toLowerCase().includes(municipality.toLowerCase())) {
-        return municipality;
-      }
-    }
-    return null;
-  };
-
   useEffect(() => {
     if (!currentUser || !userData) return;
 
@@ -88,13 +88,14 @@ export function ComplaintDashboard() {
           Object.keys(userReports).forEach(reportId => {
             const reportData = userReports[reportId];
 
-            const complaintMunicipality = getMunicipalityFromRoute(reportData.route || '');
+            const route = reportData.route || '';
+            const complaintMunicipalities = getMunicipalitiesFromRoute(route);
 
-            if (userData.municipality && complaintMunicipality !== userData.municipality) {
-              return;
+            if (userData.municipality && !complaintMunicipalities.map(m => m.toLowerCase()).includes(userData.municipality.toLowerCase())) {
+                return;
             }
             
-            const imageUrl = (reportData.images && Array.isArray(reportData.images) && reportData.images.length > 0) ? reportData.images[0] : '';
+            const imageUrls = (reportData.images && Array.isArray(reportData.images)) ? reportData.images : [];
             
             let finalSubmittedDate = 'No Date';
             if (reportData.timestamp) {
@@ -106,8 +107,8 @@ export function ComplaintDashboard() {
             loadedComplaints.push({
               id: reportId,
               userId: userId,
-              incidentPhotoUrl: imageUrl,
-              vehicleType: reportData.vehicle || 'UV Express',
+              incidentPhotoUrls: imageUrls,
+              vehicleType: reportData.vehicleType || 'Unknown',
               licensePlate: reportData.plate || 'No Plate',
               route: reportData.route || 'No Route',
               incidentTime: reportData.time || 'No Time',
@@ -214,7 +215,7 @@ export function ComplaintDashboard() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={userData.profilePictureUrl || `https://i.pravatar.cc/150?u=${currentUser?.uid}`} alt="@user" />
+                    <AvatarImage src={userData.profilePictureUrl} alt="@user" />
                     <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -284,26 +285,36 @@ export function ComplaintDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="All">All Vehicles</SelectItem>
-                    <SelectItem value="Jeepney">Jeepney</SelectItem>
-                    <SelectItem value="Tricycle">Tricycle</SelectItem>
-                    <SelectItem value="E-trike">E-trike</SelectItem>
-                    <SelectItem value="Modern PUV">Modern PUV</SelectItem>
-                    <SelectItem value="UV Express">UV Express</SelectItem>
+                    <SelectItem value="jeepney">Jeepney</SelectItem>
+                    <SelectItem value="tricycle">Tricycle</SelectItem>
+                    <SelectItem value="e-trike">E-trike</SelectItem>
+                    <SelectItem value="modern_puv">Modern PUV</SelectItem>
+                    <SelectItem value="uv_express">UV Express</SelectItem>
                   </SelectContent>
                 </Select>
                  <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
               </div>
             </div>
-            <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredComplaints.map((complaint) => (
-                  <ComplaintCard
-                    key={complaint.id}
-                    complaint={complaint}
-                    onStatusChange={updateReportStatus}
-                    onDelete={() => setComplaintToDelete(complaint)}
-                  />
-                ))}
-              </div>
+            {filteredComplaints.length > 0 ? (
+              <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filteredComplaints.map((complaint) => (
+                    <ComplaintCard
+                      key={complaint.id}
+                      complaint={complaint}
+                      onStatusChange={updateReportStatus}
+                      onDelete={() => setComplaintToDelete(complaint)}
+                    />
+                  ))}
+                </div>
+            ) : (
+                <div className="text-center py-12">
+                    <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-semibold">No Complaints Yet</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        There are currently no complaints to display for {userData.municipality}.
+                    </p>
+                </div>
+            )}
           </TabsContent>
           <TabsContent value="register-vehicle" className="mt-6">
             <div className="max-w-2xl mx-auto">

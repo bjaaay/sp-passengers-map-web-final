@@ -23,11 +23,11 @@ interface ComplaintCardProps {
 }
 
 const vehicleIcons: Record<string, React.ReactNode> = {
-  Jeepney: <JeepneyIcon className="h-5 w-5" />,
-  Tricycle: <TricycleIcon className="h-5 w-5" />,
-  'E-trike': <ETrikeIcon className="h-5 w-5" />,
-  'Modern PUV': <ModernPuvIcon className="h-5 w-5" />,
-  'UV Express': <UvExpressIcon className="h-5 w-5" />,
+  jeepney: <JeepneyIcon className="h-5 w-5" />,
+  tricycle: <TricycleIcon className="h-5 w-5" />,
+  'e-trike': <ETrikeIcon className="h-5 w-5" />,
+  'modern-puv': <ModernPuvIcon className="h-5 w-5" />,
+  'uv-express': <UvExpressIcon className="h-5 w-5" />,
 };
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; borderColor: string; }> = {
@@ -40,8 +40,8 @@ const statusConfig: Record<string, { icon: React.ReactNode; color: string; borde
 export function ComplaintCard({ complaint, onStatusChange, onDelete }: ComplaintCardProps) {
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
-  const vehicleIcon = vehicleIcons[complaint.vehicleType] || <HelpCircle className="h-5 w-5" />;
-  const isDataUrl = complaint.incidentPhotoUrl && complaint.incidentPhotoUrl.startsWith('data:image');
+  const vehicleIcon = vehicleIcons[complaint.vehicleType.toLowerCase().replace(/ /g, '-')] || <HelpCircle className="h-5 w-5" />;
+  const thumbnailUrl = complaint.incidentPhotoUrls && complaint.incidentPhotoUrls.length > 0 ? complaint.incidentPhotoUrls[0] : null;
   const viewUrl = `/dashboard/complaint?id=${complaint.id}`;
 
   let formattedSubmittedDate = "Not available";
@@ -68,9 +68,9 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
       <Link href={viewUrl}>
         <CardHeader className="p-4 cursor-pointer">
           <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
-             {isDataUrl ? (
+             {thumbnailUrl ? (
               <Image
-                src={complaint.incidentPhotoUrl}
+                src={thumbnailUrl}
                 alt={`Incident involving ${complaint.licensePlate}`}
                 fill
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"

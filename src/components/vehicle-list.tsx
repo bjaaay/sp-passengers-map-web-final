@@ -32,8 +32,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { database } from "@/lib/firebase"
-import { ref, onValue } from "firebase/database"
+import { auth, database } from "@/lib/firebase"
+import { ref, onValue, query, orderByChild, equalTo } from "firebase/database"
 import type { Vehicle } from "@/lib/types"
 import { format } from "date-fns"
 import { ImageViewDialog } from "./image-view-dialog"
@@ -47,8 +47,12 @@ export function VehicleList() {
   const [selectedImage, setSelectedImage] = React.useState<{src: string, title: string} | null>(null)
 
   React.useEffect(() => {
+    if (!auth.currentUser) return;
+
     const vehiclesRef = ref(database, 'vehicles/');
-    const unsubscribe = onValue(vehiclesRef, (snapshot) => {
+    const userVehiclesQuery = query(vehiclesRef, orderByChild('userId'), equalTo(auth.currentUser.uid));
+
+    const unsubscribe = onValue(userVehiclesQuery, (snapshot) => {
       const vehiclesData = snapshot.val();
       if (vehiclesData) {
         const vehiclesList = Object.keys(vehiclesData).map(key => ({
