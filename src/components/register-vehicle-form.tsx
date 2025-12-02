@@ -53,7 +53,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const TRACCAR_URL = "https://traccar.live-vehicles.site/api/devices";
-const TRACCAR_AUTH = "Basic " + btoa("johvalenzuela@gbox.adnu.edu.ph:admin.Traccar");
+const TRACCAR_AUTH = "Basic " + btoa("johvalenzuela@gbox.adnu.edu.ph:SPadmin.Traccar");
 
 
 
@@ -102,9 +102,9 @@ export function RegisterVehicleForm() {
       });
  
       if (!traccarResponse.ok) {
-        const errorData = await traccarResponse.json();
-        console.error("Traccar API error:", errorData)
-        throw new Error("Failed to add device to Traccar. The device may already be registered in Traccar.");
+        const errorText = await traccarResponse.text();
+        console.error("Traccar API error:", errorText);
+        throw new Error(`Failed to add device to Traccar. ${errorText}`);
       }
 
 
@@ -167,11 +167,11 @@ export function RegisterVehicleForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="jeepney">Jeepney</SelectItem>
-                      <SelectItem value="tricycle">Tricycle</SelectItem>
-                      <SelectItem value="etrike">E-trike</SelectItem>
-                      <SelectItem value="modern_puv">Modern PUV</SelectItem>
-                      <SelectItem value="uv_express">UV Express</SelectItem>
+                      <SelectItem value="Jeepney">Jeepney</SelectItem>
+                      <SelectItem value="Tricycle">Tricycle</SelectItem>
+                      <SelectItem value="E-trike">E-trike</SelectItem>
+                      <SelectItem value="Modern PUV">Modern PUV</SelectItem>
+                      <SelectItem value="UV Express">UV Express</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

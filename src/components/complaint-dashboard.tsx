@@ -24,12 +24,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { MunicipalContactsForm } from "./municipal-contacts-form";
 import { TerminalForm } from "./terminal-form";
 import { MunicipalityForm } from "./municipality-form";
+import { municipalities } from "@/lib/municipalities";
 
 interface UserData {
   firstName: string;
   lastName: string;
   office: 'PSO';
   profilePictureUrl?: string;
+  municipality?: string;
 }
 
 export function ComplaintDashboard() {
@@ -63,8 +65,17 @@ export function ComplaintDashboard() {
     return () => unsubscribe();
   }, [router]);
   
+  const getMunicipalityFromRoute = (route: string) => {
+    for (const municipality of municipalities) {
+      if (route.toLowerCase().includes(municipality.toLowerCase())) {
+        return municipality;
+      }
+    }
+    return null;
+  };
+
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !userData) return;
 
     const reportsRef = ref(database, 'reports');
 
@@ -76,6 +87,13 @@ export function ComplaintDashboard() {
           const userReports = allReports[userId];
           Object.keys(userReports).forEach(reportId => {
             const reportData = userReports[reportId];
+
+            const complaintMunicipality = getMunicipalityFromRoute(reportData.route || '');
+
+            if (userData.municipality && complaintMunicipality !== userData.municipality) {
+              return;
+            }
+            
             const imageUrl = (reportData.images && Array.isArray(reportData.images) && reportData.images.length > 0) ? reportData.images[0] : '';
             
             let finalSubmittedDate = 'No Date';
@@ -115,7 +133,7 @@ export function ComplaintDashboard() {
 
     return () => unsubscribe();
 
-  }, [currentUser, toast]);
+  }, [currentUser, toast, userData]);
 
 
   const handleLogout = async () => {
@@ -266,11 +284,11 @@ export function ComplaintDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="All">All Vehicles</SelectItem>
-                    <SelectItem value="jeepney">Jeepney</SelectItem>
-                    <SelectItem value="tricycle">Tricycle</SelectItem>
-                    <SelectItem value="etrike">E-trike</SelectItem>
-                    <SelectItem value="modern_puv">Modern PUV</SelectItem>
-                    <SelectItem value="uv_express">UV Express</SelectItem>
+                    <SelectItem value="Jeepney">Jeepney</SelectItem>
+                    <SelectItem value="Tricycle">Tricycle</SelectItem>
+                    <SelectItem value="E-trike">E-trike</SelectItem>
+                    <SelectItem value="Modern PUV">Modern PUV</SelectItem>
+                    <SelectItem value="UV Express">UV Express</SelectItem>
                   </SelectContent>
                 </Select>
                  <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
