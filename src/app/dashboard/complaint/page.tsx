@@ -1,10 +1,9 @@
-"use client"
+'use client'
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { database } from '@/lib/firebase';
 import { ref, onValue, update } from 'firebase/database';
-import Image from 'next/image';
 import { format, isValid, parse } from 'date-fns';
 import type { Complaint } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -137,12 +136,10 @@ function ComplaintDetailsContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 border rounded-lg overflow-hidden shadow-lg">
               <div className="relative h-96 md:h-[600px] bg-muted group">
                 {hasImages && activeImageUrl ? (
-                  <Image
-                    src={activeImageUrl}
+                  <img
+                    src={activeImageUrl.replace('http://', 'https://')}
                     alt={`Incident involving ${complaint.licensePlate}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-contain"
+                    style={{ objectFit: 'contain', width: '100%', height: '100%' }}
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
@@ -185,12 +182,10 @@ function ComplaintDetailsContent() {
                                         'w-20 h-20 rounded-md overflow-hidden border-2 transition-colors',
                                         index === activeImageIndex ? 'border-primary' : 'border-transparent hover:border-muted-foreground/50'
                                     )}>
-                                         <Image
-                                            src={url}
+                                         <img
+                                            src={url.replace('http://', 'https://')}
                                             alt={`Thumbnail ${index + 1}`}
-                                            width={80}
-                                            height={80}
-                                            className="object-cover w-full h-full"
+                                            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                                         />
                                     </button>
                                 ))}

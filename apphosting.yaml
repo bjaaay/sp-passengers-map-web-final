@@ -2,6 +2,15 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
+  # The following CPU and memory sizes are not required, but are recommended
+  # by Next.js for running a production server.
+  # https://nextjs.org/docs/pages/building-your-application/deploying/self-hosting#system-requirements
+  cpu: 1
+  memoryMiB: 2048
+
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+
+# Automatically deploy your backend to App Hosting when you push to this branch.
+deploymentBranch: main

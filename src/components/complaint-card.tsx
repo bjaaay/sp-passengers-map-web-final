@@ -1,6 +1,5 @@
 "use client"
 
-import Image from 'next/image';
 import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -69,12 +68,11 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
         <CardHeader className="p-4 cursor-pointer">
           <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
              {thumbnailUrl ? (
-              <Image
-                src={thumbnailUrl}
+              <img
+                src={thumbnailUrl.replace('http://', 'https://')}
                 alt={`Incident involving ${complaint.licensePlate}`}
-                fill
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 22vw"
-                className="object-cover"
+                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                className="absolute top-0 left-0"
               />
              ) : (
               <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
@@ -104,8 +102,8 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
               <p className="line-clamp-2">{complaint.description}</p>
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-              <p><strong>Submitted:</strong> {formattedSubmittedDate}</p>
               <p><strong>Incident:</strong> {complaint.incidentTime} {complaint.incidentDate}</p>
+              <p><strong>Submitted:</strong> {formattedSubmittedDate}</p>
             </div>
           </div>
         </CardContent>
