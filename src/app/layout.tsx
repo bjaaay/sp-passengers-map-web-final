@@ -1,10 +1,11 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'Passengers Map',
-  description: 'A map-based complaint reporting system for public transport.',
+  description: 'A Smart Mobile Application for Real-Time Public Transportation Tracking',
 };
 
 export default function RootLayout({
@@ -20,8 +21,8 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-secondary">
-        {children}
-        <Toaster />
+          {children}
+          <Toaster />
       </body>
     </html>
   );

@@ -14,10 +14,14 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { onAuthStateChanged } from "firebase/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { MapPicker } from "./map-picker.tsx";
+import { MapsProvider } from "./maps-provider.tsx";
 
 const formSchema = z.object({
   terminalName: z.string().min(1, { message: "Terminal name is required." }),
-  address: z.string().min(1, { message: "Address is required." }),
+  address: z.string().optional(),
+  latitude: z.number({ required_error: "Latitude is required." }),
+  longitude: z.number({ required_error: "Longitude is required." }),
   imageUrl: z.string().min(1, { message: "An image is required." }),
 });
 
@@ -53,12 +57,17 @@ export function TerminalForm() {
     return () => unsubscribe();
   }, []);
 
+  const handleLocationSelect = (location: { lat: number; lng: number }) => {
+    form.setValue("latitude", location.lat);
+    form.setValue("longitude", location.lng);
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!municipality) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not determine the user\'s municipality.",
+        description: "Could not determine the user's municipality.",
       });
       return;
     }
@@ -68,6 +77,8 @@ export function TerminalForm() {
       await push(terminalsRef, {
         name: values.terminalName,
         address: values.address,
+        latitude: values.latitude,
+        longitude: values.longitude,
         imageUrl: values.imageUrl,
       });
 
@@ -114,7 +125,7 @@ export function TerminalForm() {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>Address (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter terminal address" {...field} />
                   </FormControl>
@@ -122,6 +133,13 @@ export function TerminalForm() {
                 </FormItem>
               )}
             />
+
+            <div className="space-y-2">
+              <FormLabel>Pinpoint Location</FormLabel>
+              <MapsProvider>
+                <MapPicker onLocationSelect={handleLocationSelect} />
+              </MapsProvider>
+            </div>
 
             <FormField
               control={form.control}
