@@ -52,6 +52,7 @@ export function ComplaintDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [vehicleTypeFilter, setVehicleTypeFilter] = useState('All');
+  const [incidentTypeFilter, setIncidentTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   
   const router = useRouter();
@@ -109,6 +110,7 @@ export function ComplaintDashboard() {
               userId: userId,
               incidentPhotoUrls: imageUrls,
               vehicleType: reportData.vehicleType || 'Unknown',
+              incidentType: reportData.incidentType || 'other',
               licensePlate: reportData.plate || 'No Plate',
               route: reportData.route || 'No Route',
               incidentTime: reportData.time || 'No Time',
@@ -188,12 +190,13 @@ export function ComplaintDashboard() {
       const statusMatch =
         statusFilter === 'All' || complaint.status === statusFilter;
       const vehicleMatch = vehicleTypeFilter === 'All' || normalizeVehicleType(complaint.vehicleType) === vehicleTypeFilter;
+      const incidentMatch = incidentTypeFilter === 'All' || complaint.incidentType === incidentTypeFilter;
 
       const dateMatch = !dateFilter || (complaint.incidentDate && new Date(complaint.incidentDate).toDateString() === dateFilter.toDateString());
       
-      return searchMatch && statusMatch && vehicleMatch && dateMatch;
+      return searchMatch && statusMatch && vehicleMatch && dateMatch && incidentMatch;
     });
-  }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, dateFilter]);
+  }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, incidentTypeFilter, dateFilter]);
 
 
   if (!currentUser || !userData) {
@@ -290,6 +293,20 @@ export function ComplaintDashboard() {
                     <SelectItem value="e-trike">E-trike</SelectItem>
                     <SelectItem value="modern_puv">Modern PUV</SelectItem>
                     <SelectItem value="uv_express">UV Express</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={incidentTypeFilter} onValueChange={setIncidentTypeFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Incident Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Incidents</SelectItem>
+                    <SelectItem value="driver_attitude">Driver Attitude</SelectItem>
+                    <SelectItem value="vehicle_overload">Vehicle Overload</SelectItem>
+                    <SelectItem value="fare_overcharging">Fare Overcharging</SelectItem>
+                    <SelectItem value="harassment">Harassment</SelectItem>
+                    <SelectItem value="reckless_driving">Reckless Driving</SelectItem>
+                    <SelectItem value="other">Others</SelectItem>
                   </SelectContent>
                 </Select>
                  <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
