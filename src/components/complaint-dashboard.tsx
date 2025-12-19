@@ -29,7 +29,7 @@ import { municipalities } from "@/lib/municipalities";
 interface UserData {
   firstName: string;
   lastName: string;
-  office: 'PSO';
+  office: 'PSO' | 'Super Admin';
   profilePictureUrl?: string;
   municipality?: string;
 }
@@ -118,6 +118,7 @@ export function ComplaintDashboard() {
               description: reportData.description || 'No Description',
               status: reportData.status || 'New',
               submittedDate: finalSubmittedDate,
+              resolutionNotes: reportData.resolutionNotes || '',
             });
           });
         });
@@ -144,7 +145,7 @@ export function ComplaintDashboard() {
     router.push('/');
   };
 
-  const updateReportStatus = (id: string, status: 'New' | 'Review' | 'Resolved') => {
+  const updateReportStatus = (id: string, status: 'New' | 'Pending' | 'Under Investigation' | 'Resolved') => {
     const complaintToUpdate = complaints.find(c => c.id === id);
     if (complaintToUpdate && complaintToUpdate.userId) {
       const reportRef = ref(database, `reports/${complaintToUpdate.userId}/${id}`);
@@ -226,9 +227,9 @@ export function ComplaintDashboard() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userData.firstName} {userData.lastName}</p>
+                        <p className="text-sm font-medium leading-none">{`${userData.firstName} ${userData.lastName} (${userData.office})`}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          Public Safety Office
+                          {userData.office === 'PSO' ? 'Public Safety Office' : 'Super Administrator'}
                         </p>
                       </div>
                 </DropdownMenuLabel>
@@ -278,7 +279,8 @@ export function ComplaintDashboard() {
                   <SelectContent>
                     <SelectItem value="All">All Statuses</SelectItem>
                     <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="Review">Review</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Under Investigation">Under Investigation</SelectItem>
                     <SelectItem value="Resolved">Resolved</SelectItem>
                   </SelectContent>
                 </Select>

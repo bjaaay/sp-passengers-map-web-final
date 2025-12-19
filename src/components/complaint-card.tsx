@@ -1,10 +1,11 @@
 "use client"
 
+import { useState } from 'react';
 import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Eye, Car, MessageSquareText, HelpCircle, ImageOff, Trash2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye, Car, MessageSquareText, HelpCircle, ImageOff, Trash2, Hourglass, ShieldQuestion } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { JeepneyIcon } from './jeepney-icon';
@@ -14,10 +15,14 @@ import { ModernPuvIcon } from './modern-puv-icon';
 import { UvExpressIcon } from './uv-express-icon';
 import Link from 'next/link';
 import { format, isValid, parse } from 'date-fns';
+import { Textarea } from './ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { database } from '@/lib/firebase';
+import { ref, update } from 'firebase/database';
 
 interface ComplaintCardProps {
   complaint: Complaint;
-  onStatusChange: (id: string, status: 'New' | 'Review' | 'Resolved') => void;
+  onStatusChange: (id: string, status: 'New' | 'Pending' | 'Under Investigation' | 'Resolved') => void;
   onDelete: (id: string) => void;
 }
 
@@ -31,12 +36,16 @@ const vehicleIcons: Record<string, React.ReactNode> = {
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; borderColor: string; }> = {
     New: { icon: <AlertCircle className="mr-1.5 h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', borderColor: 'border-yellow-200 dark:border-yellow-800' },
-    Review: { icon: <Eye className="mr-1.5 h-4 w-4" />, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', borderColor: 'border-blue-200 dark:border-blue-800' },
+    Pending: { icon: <Hourglass className="mr-1.5 h-4 w-4" />, color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300', borderColor: 'border-orange-200 dark:border-orange-800' },
+    'Under Investigation': { icon: <ShieldQuestion className="mr-1.5 h-4 w-4" />, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', borderColor: 'border-blue-200 dark:border-blue-800' },
     Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300', borderColor: 'border-green-200 dark:border-green-800' },
     Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300', borderColor: 'border-gray-200 dark:border-gray-800' },
 }
 
 export function ComplaintCard({ complaint, onStatusChange, onDelete }: ComplaintCardProps) {
+  const { toast } = useToast();
+  const [resolutionNotes, setResolutionNotes] = useState(complaint.resolutionNotes || '');
+
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
   const vehicleIcon = vehicleIcons[complaint.vehicleType.toLowerCase().replace(/ /g, '-')] || <HelpCircle className="h-5 w-5" />;
@@ -57,6 +66,18 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
           }
       } catch (e) {}
   }
+
+  const handleSaveNotes = () => {
+    if (!complaint.userId || !complaint.id) return;
+    const reportRef = ref(database, `reports/${complaint.userId}/${complaint.id}`);
+    update(reportRef, { resolutionNotes })
+      .then(() => {
+          toast({ title: "Notes Saved", description: "Resolution notes have been updated." });
+      })
+      .catch(error => {
+          toast({ variant: 'destructive', title: "Save Failed", description: error.message });
+      });
+  };
 
   return (
     <Card className={cn(
@@ -108,32 +129,43 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
           </div>
         </CardContent>
        </Link>
-      <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={viewUrl}>
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            View
-          </Link>
-        </Button>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={complaint.status === 'Resolved'}>
-              Update Status
+      <CardFooter className="p-4 pt-0 flex-col gap-2 items-stretch">
+         <div className="space-y-2">
+            <Textarea 
+                placeholder="Add resolution notes..."
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                className="w-full text-sm"
+            />
+            <Button onClick={handleSaveNotes} size="sm" className="w-full">Save Notes</Button>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mt-2">
+            <Button variant="outline" size="sm" asChild>
+            <Link href={viewUrl}>
+                <MessageSquareText className="mr-2 h-4 w-4" />
+                View
+            </Link>
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[180px]">
-            {(['New', 'Review', 'Resolved'] as const).map((status) => (
-              <DropdownMenuItem
-                key={status}
-                disabled={complaint.status === status}
-                onClick={() => onStatusChange(complaint.id, status)}
-              >
-                {status}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            
+            <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={complaint.status === 'Resolved'}>
+                Update Status
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+                {(['New', 'Pending', 'Under Investigation', 'Resolved'] as const).map((status) => (
+                <DropdownMenuItem
+                    key={status}
+                    disabled={complaint.status === status}
+                    onClick={() => onStatusChange(complaint.id, status)}
+                >
+                    {status}
+                </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
       </CardFooter>
     </Card>
   );

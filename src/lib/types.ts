@@ -10,8 +10,9 @@ export type Complaint = {
   incidentTime: string;
   incidentDate: string;
   description: string;
-  status: 'New' | 'Review' | 'Resolved';
+  status: 'New' | 'Pending' | 'Under Investigation' | 'Resolved';
   submittedDate: string;
+  resolutionNotes?: string;
 };
 
 export type Vehicle = {
