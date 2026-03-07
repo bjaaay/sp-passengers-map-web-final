@@ -148,14 +148,14 @@ export default function LandingPage() {
                   <div className="bg-green-50 rounded-lg p-4 hover:bg-green-100 transition cursor-pointer h-full">
                     <p className="text-2xl font-bold text-green-600">⚠️</p>
                     <p className="text-sm font-medium mt-2">Monitor</p>
-                    <p className="text-xs text-muted-foreground">Top Violators</p>
+                    <p className="text-xs text-muted-foreground">Violators</p>
                   </div>
                 </Link>
                 <Link href="/analytics">
                   <div className="bg-purple-50 rounded-lg p-4 hover:bg-purple-100 transition cursor-pointer h-full">
                     <p className="text-2xl font-bold text-purple-600">📊</p>
                     <p className="text-sm font-medium mt-2">View</p>
-                    <p className="text-xs text-muted-foreground">Analytics & Charts</p>
+                    <p className="text-xs text-muted-foreground">Analytics</p>
                   </div>
                 </Link>
               </div>
