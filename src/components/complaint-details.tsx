@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { database } from '@/lib/firebase';
-import { ref, onValue, update } from 'firebase/database';
+import { ref, onValue, update, push } from 'firebase/database';
 import type { Complaint } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,9 +73,26 @@ export default function ComplaintDetails() {
     if (!complaint) return;
 
     const reportRef = ref(database, `reports/${complaint.userId}/${complaint.id}`);
+    const webNotifsRef = ref(database, `webNotifications/${complaint.userId}`);
+
+    // Update the complaint with new status and resolution notes
     update(reportRef, { resolutionNotes, status })
       .then(() => {
-        toast({ title: 'Complaint Updated', description: 'The complaint details have been saved.' });
+        // Create a notification for the mobile app about the status update
+        const notification = {
+          type: 'complaint_status_updated',
+          complaintId: complaint.id,
+          status: status,
+          resolutionNotes: resolutionNotes,
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+
+        // Push the notification to the user's web notifs list
+        return push(webNotifsRef, notification);
+      })
+      .then(() => {
+        toast({ title: 'Complaint Updated', description: 'The complaint details have been saved and notification sent.' });
       })
       .catch((error) => {
         toast({ variant: 'destructive', title: 'Error', description: error.message });

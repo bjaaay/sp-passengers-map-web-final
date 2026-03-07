@@ -129,44 +129,6 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
           </div>
         </CardContent>
        </Link>
-      <CardFooter className="p-4 pt-0 flex-col gap-2 items-stretch">
-         <div className="space-y-2">
-            <Textarea 
-                placeholder="Add resolution notes..."
-                value={resolutionNotes}
-                onChange={(e) => setResolutionNotes(e.target.value)}
-                className="w-full text-sm"
-            />
-            <Button onClick={handleSaveNotes} size="sm" className="w-full">Save Notes</Button>
-        </div>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-            <Button variant="outline" size="sm" asChild>
-            <Link href={viewUrl}>
-                <MessageSquareText className="mr-2 h-4 w-4" />
-                View
-            </Link>
-            </Button>
-            
-            <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={complaint.status === 'Resolved'}>
-                Update Status
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[180px]">
-                {(['New', 'Pending', 'Under Investigation', 'Resolved'] as const).map((status) => (
-                <DropdownMenuItem
-                    key={status}
-                    disabled={complaint.status === status}
-                    onClick={() => onStatusChange(complaint.id, status)}
-                >
-                    {status}
-                </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

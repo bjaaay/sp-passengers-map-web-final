@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "powershell -NoProfile -Command \"Get-ChildItem -Force -Path .next,node_modules,temp_empty,components.json,.idx,.modified -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue\""
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",

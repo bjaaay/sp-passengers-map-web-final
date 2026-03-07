@@ -55,7 +55,7 @@ export function LoginForm() {
             description: "Welcome back!",
           });
           
-          router.push("/dashboard");
+          router.push("/landing");
 
         } else {
           await signOut(auth);

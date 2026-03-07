@@ -221,12 +221,6 @@ export function ProfileForm() {
                                 <span>Password</span>
                                 <Button variant="outline" className="ml-auto" onClick={() => setIsPasswordModalOpen(true)}>Change Password</Button>
                            </div>
-                           <Separator className="my-4"/>
-                           <div className="flex items-center">
-                                <ShieldCheck className="h-5 w-5 mr-3 text-muted-foreground"/>
-                                <span>Account Status</span>
-                               <span className="ml-auto text-sm font-medium text-green-600">Verified</span>
-                           </div>
                         </CardContent>
                     </Card>
 
