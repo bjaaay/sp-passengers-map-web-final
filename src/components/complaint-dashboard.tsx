@@ -25,6 +25,7 @@ import { MunicipalContactsForm } from "./municipal-contacts-form";
 import { TerminalForm } from "./terminal-form";
 import { MunicipalityForm } from "./municipality-form";
 import { municipalities } from "@/lib/municipalities";
+import { ArrowLeft } from 'lucide-react';
 
 interface UserData {
   firstName: string;
@@ -250,6 +251,16 @@ export function ComplaintDashboard() {
            </div>
          </div>
        </header>
+
+      <div className="mb-6 flex items-center justify-between">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/landing">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Landing
+            </Link>
+          </Button>
+        </div>
+
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="complaints" className="w-full">
           <TabsList className="grid w-full grid-cols-6 max-w-4xl mx-auto">
