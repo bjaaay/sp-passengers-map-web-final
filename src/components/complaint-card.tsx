@@ -93,12 +93,12 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
 
   return (
     <Card className={cn(
-      "flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1",
+      "flex flex-col transition-all duration-200 hover:shadow-md",
       currentStatusConfig.borderColor,
-      complaint.status === 'Resolved' ? 'bg-green-50/50 dark:bg-green-950/50' : ''
+      complaint.status === 'Resolved' ? 'bg-green-50/30 dark:bg-green-950/30' : ''
     )}>
       <Link href={viewUrl}>
-        <CardHeader className="p-4 cursor-pointer">
+        <CardHeader className="p-3 cursor-pointer">
           <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
              {thumbnailUrl ? (
               <img
@@ -108,25 +108,24 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
                 className="absolute top-0 left-0"
               />
              ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center text-center p-4">
-                <ImageOff className="h-10 w-10 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">No photo provided</p>
+              <div className="flex h-full w-full flex-col items-center justify-center text-center p-2">
+                <ImageOff className="h-8 w-8 text-muted-foreground" />
+                <p className="mt-1 text-xs text-muted-foreground">No photo</p>
               </div>
              )}
           </div>
         </CardHeader>
-        <CardContent className="flex-grow p-4 pt-0 cursor-pointer">
+        <CardContent className="flex-grow p-3 pt-0 cursor-pointer">
           <div className="mb-2 flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold leading-none tracking-tight">{complaint.licensePlate}</CardTitle>
+            <CardTitle className="text-base font-semibold leading-none tracking-tight">{complaint.licensePlate}</CardTitle>
             <Badge variant={'outline'} className={cn(
-              "border-transparent",
+              "border-transparent text-xs",
               currentStatusConfig.color
             )}>
-              {currentStatusConfig.icon}
               {statusLabel}
             </Badge>
           </div>
-          <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               {vehicleIcon}
               <span>{formattedVehicleType}</span>
@@ -134,7 +133,7 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
             <div>
               <p className="line-clamp-2">{complaint.description}</p>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+            <div className="text-[10px] text-gray-500 dark:text-gray-400 space-y-0.5">
               <p><strong>Incident:</strong> {complaint.incidentTime} {complaint.incidentDate}</p>
               <p><strong>Submitted:</strong> {formattedSubmittedDate}</p>
             </div>

@@ -9,7 +9,9 @@ import { VehicleList } from "./vehicle-list";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { UserCircle, LogOut, Search, Inbox, ChevronDown, Shield } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { UserCircle, LogOut, Search, Inbox, ChevronDown, Menu, X, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { AdminHeader } from "./admin-header";
 import Link from "next/link";
 import { signOut, User } from "firebase/auth";
 import { auth, database } from "@/lib/firebase";
@@ -25,7 +27,6 @@ import { MunicipalContactsForm } from "./municipal-contacts-form";
 import { TerminalForm } from "./terminal-form";
 import { MunicipalityForm } from "./municipality-form";
 import { municipalities } from "@/lib/municipalities";
-import { ArrowLeft } from 'lucide-react';
 
 interface UserData {
   firstName: string;
@@ -49,6 +50,17 @@ export function ComplaintDashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [complaintToDelete, setComplaintToDelete] = useState<Complaint | null>(null);
+  const [activeSection, setActiveSection] = useState('complaints');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const navigationItems = [
+    { id: 'complaints', label: 'Complaints', icon: Inbox },
+    { id: 'register-vehicle', label: 'Register Vehicle', icon: Menu },
+    { id: 'vehicles', label: 'Vehicles', icon: Menu },
+    { id: 'municipal-contacts', label: 'Municipal Contacts', icon: Menu },
+    { id: 'terminals', label: 'Terminals', icon: Menu },
+    { id: 'municipality', label: 'Municipality', icon: Menu },
+  ];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -140,12 +152,6 @@ export function ComplaintDashboard() {
 
   }, [currentUser, toast, userData]);
 
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/');
-  };
-
   const updateReportStatus = (id: string, status: 'New' | 'Pending' | 'Under Investigation' | 'Resolved') => {
     const complaintToUpdate = complaints.find(c => c.id === id);
     if (complaintToUpdate && complaintToUpdate.userId) {
@@ -200,188 +206,235 @@ export function ComplaintDashboard() {
     });
   }, [complaints, searchTerm, statusFilter, vehicleTypeFilter, incidentTypeFilter, dateFilter]);
 
-
   if (!currentUser || !userData) {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
-       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
-         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-               <h1 className="text-2xl font-bold tracking-tight">
+    <div className="flex h-full bg-background">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-background border-r transform transition-transform duration-200 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${!isSidebarOpen ? 'lg:w-16' : ''}
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            {!isSidebarOpen && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="hidden lg:flex"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+            {isSidebarOpen && (
+              <>
+                <h2 className="text-lg font-semibold">Dashboard</h2>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden lg:flex"
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+          
+          {/* Navigation */}
+          <nav className="flex-1 p-4 space-y-2">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeSection === item.id ? "default" : "ghost"}
+                className={`
+                  w-full justify-start transition-all duration-200
+                  ${!isSidebarOpen ? 'px-2 lg:px-0' : ''}
+                `}
+                onClick={() => {
+                  setActiveSection(item.id);
+                  setIsSidebarOpen(false);
+                }}
+                title={!isSidebarOpen ? item.label : undefined}
+              >
+                <item.icon className="h-4 w-4" />
+                {isSidebarOpen && <span className="ml-2">{item.label}</span>}
+              </Button>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+                <h1 className="text-2xl font-bold tracking-tight">
                   <span className="text-green-500">Passengers</span>
                   <span className="text-blue-500"> Map</span>
                 </h1>
-            </div>
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-auto p-2 flex items-center gap-3 hover:bg-accent">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={userData.profilePictureUrl} alt="@user" />
-                    <AvatarFallback className="text-sm font-medium">{userData.firstName?.[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start">
-                    <p className="text-sm font-medium">{userData.firstName} {userData.lastName}</p>
-                    <p className="text-xs text-muted-foreground">{userData.office === 'PSO' ? 'Public Safety Office' : 'Super Administrator'}</p>
-                  </div>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" forceMount>
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-           </div>
-         </div>
-       </header>
-
-      <div className="mb-6 flex items-center justify-between">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/landing">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Landing
-            </Link>
-          </Button>
-        </div>
-
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="complaints" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 max-w-4xl mx-auto">
-            <TabsTrigger value="complaints">Complaints</TabsTrigger>
-            <TabsTrigger value="register-vehicle">Register Vehicle</TabsTrigger>
-            <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
-            <TabsTrigger value="municipal-contacts">Municipal Contacts</TabsTrigger>
-            <TabsTrigger value="terminals">Terminals</TabsTrigger>
-            <TabsTrigger value="municipality">Municipality</TabsTrigger>
-          </TabsList>
-          <TabsContent value="complaints" className="mt-6">
-            <div className="py-4 border-b flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by license plate or description..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                />
+                <span className="ml-4 text-sm font-medium text-muted-foreground capitalize">
+                  {navigationItems.find(item => item.id === activeSection)?.label}
+                </span>
               </div>
-              <div className="grid grid-cols-2 sm:flex gap-2">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[150px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All Statuses</SelectItem>
-                    <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Under Investigation">Under Investigation</SelectItem>
-                    <SelectItem value="Resolved">Resolved</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
-                  <SelectTrigger className="w-full sm:w-[150px]">
-                    <SelectValue placeholder="Vehicle Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All Vehicles</SelectItem>
-                    <SelectItem value="jeepney">Jeepney</SelectItem>
-                    <SelectItem value="tricycle">Tricycle</SelectItem>
-                    <SelectItem value="e-trike">E-trike</SelectItem>
-                    <SelectItem value="modern_puv">Modern PUV</SelectItem>
-                    <SelectItem value="uv_express">UV Express</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={incidentTypeFilter} onValueChange={setIncidentTypeFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Incident Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All Incidents</SelectItem>
-                    <SelectItem value="driver_attitude">Driver Attitude</SelectItem>
-                    <SelectItem value="vehicle_overload">Vehicle Overload</SelectItem>
-                    <SelectItem value="fare_overcharging">Fare Overcharging</SelectItem>
-                    <SelectItem value="harassment">Harassment</SelectItem>
-                    <SelectItem value="reckless_driving">Reckless Driving</SelectItem>
-                    <SelectItem value="other">Others</SelectItem>
-                  </SelectContent>
-                </Select>
-                 <DatePicker date={dateFilter} setDate={setDateFilter} className="w-full sm:w-[240px]" />
-              </div>
+              <AdminHeader userData={userData} />
             </div>
-            {filteredComplaints.length > 0 ? (
-              <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {filteredComplaints.map((complaint) => (
+          </div>
+        </header>
+
+        <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-auto">
+          {/* Back Button */}
+          <div className="mb-6">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/landing">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Landing
+              </Link>
+            </Button>
+          </div>
+
+          {/* Content Sections */}
+          {activeSection === 'complaints' && (
+            <div className="space-y-6">
+              <div className="py-4 border-b flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-grow">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by license plate or description..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Status</SelectItem>
+                      <SelectItem value="New">New</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Under Investigation">Under Investigation</SelectItem>
+                      <SelectItem value="Resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={vehicleTypeFilter} onValueChange={setVehicleTypeFilter}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Vehicle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Vehicles</SelectItem>
+                      <SelectItem value="jeepney">Jeepney</SelectItem>
+                      <SelectItem value="tricycle">Tricycle</SelectItem>
+                      <SelectItem value="e-trike">E-Trike</SelectItem>
+                      <SelectItem value="modern-puv">Modern PUV</SelectItem>
+                      <SelectItem value="uv-express">UV Express</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <DatePicker
+                    date={dateFilter}
+                    setDate={setDateFilter}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid gap-4">
+                {filteredComplaints.length > 0 ? (
+                  filteredComplaints.map(complaint => (
                     <ComplaintCard
                       key={complaint.id}
                       complaint={complaint}
                       onStatusChange={updateReportStatus}
                       onDelete={() => setComplaintToDelete(complaint)}
                     />
-                  ))}
-                </div>
-            ) : (
-                <div className="text-center py-12">
-                    <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-semibold">No Complaints Yet</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        There are currently no complaints to display for {userData.municipality}.
-                    </p>
-                </div>
-            )}
-          </TabsContent>
-          <TabsContent value="register-vehicle" className="mt-6">
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No complaints found matching your criteria.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {activeSection === 'register-vehicle' && (
             <div className="max-w-2xl mx-auto">
               <RegisterVehicleForm />
             </div>
-          </TabsContent>
-           <TabsContent value="vehicles" className="mt-6">
-            <VehicleList />
-          </TabsContent>
-          <TabsContent value="municipal-contacts" className="mt-6">
+          )}
+          
+          {activeSection === 'vehicles' && <VehicleList />}
+          
+          {activeSection === 'municipal-contacts' && (
             <div className="max-w-2xl mx-auto">
               <MunicipalContactsForm />
             </div>
-          </TabsContent>
-          <TabsContent value="terminals" className="mt-6">
+          )}
+          
+          {activeSection === 'terminals' && (
             <div className="max-w-2xl mx-auto">
               <TerminalForm />
             </div>
-          </TabsContent>
-          <TabsContent value="municipality" className="mt-6">
+          )}
+          
+          {activeSection === 'municipality' && (
             <div className="max-w-2xl mx-auto">
               <MunicipalityForm />
             </div>
-          </TabsContent>
-        </Tabs>
-      </main>
+          )}
+        </main>
 
-       <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the complaint
-              for license plate <span className="font-bold">{complaintToDelete?.licensePlate}</span>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setComplaintToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteComplaint}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!complaintToDelete} onOpenChange={() => setComplaintToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Complaint</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this complaint? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteComplaint} className="bg-red-600 hover:bg-red-700">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
-  )
+  );
 }

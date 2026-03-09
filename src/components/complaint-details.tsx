@@ -20,6 +20,7 @@ import { TricycleIcon } from './tricycle-icon';
 import { ETrikeIcon } from './e-trike-icon';
 import { ModernPuvIcon } from './modern-puv-icon';
 import { UvExpressIcon } from './uv-express-icon';
+import { AdminHeader } from './admin-header';
 import { format, isValid, parse } from 'date-fns';
 
 export default function ComplaintDetails() {
@@ -182,99 +183,115 @@ export default function ComplaintDetails() {
   const formattedIncidentDate = formatSubmittedDate(complaint.incidentDate);
 
   return (
-    <div className="container mx-auto p-4">
-        <div className="mb-4">
-            <Button asChild variant="outline">
+    <div className="flex flex-col h-full bg-background">
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight">
+                <span className="text-green-500">Passengers</span>
+                <span className="text-blue-500"> Map</span>
+              </h1>
+              <span className="ml-4 text-sm font-medium text-muted-foreground">Complaint Details</span>
+            </div>
+            {userData && <AdminHeader userData={userData} />}
+            <div>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/dashboard">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Dashboard
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Dashboard
                 </Link>
-            </Button>
+              </Button>
+            </div>
+          </div>
         </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Complaint Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><strong>License Plate:</strong> {complaint.licensePlate}</div>
-            <div className="flex items-center gap-2">
-              <strong>Vehicle Type:</strong>
-              <div className="flex items-center gap-1">
-                {vehicleIcon}
-                <span>{formattedVehicleType}</span>
+      </header>
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Complaint Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><strong>License Plate:</strong> {complaint.licensePlate}</div>
+              <div className="flex items-center gap-2">
+                <strong>Vehicle Type:</strong>
+                <div className="flex items-center gap-1">
+                  {vehicleIcon}
+                  <span>{formattedVehicleType}</span>
+                </div>
+              </div>
+              <div><strong>Incident Type:</strong> {formattedIncidentType}</div>
+              <div><strong>Route:</strong> {complaint.route}</div>
+              <div><strong>Incident Date:</strong> {formattedIncidentDate}</div>
+              <div><strong>Incident Time:</strong> {complaint.incidentTime}</div>
+              <div><strong>Submitted Date:</strong> {formattedSubmittedDate}</div>
+              <div className="flex items-center gap-2">
+                <strong>Status:</strong>
+                <Badge variant={'outline'} className={"border-transparent " + currentStatusConfig.color}>
+                  {currentStatusConfig.icon}
+                  {complaint.status}
+                </Badge>
               </div>
             </div>
-            <div><strong>Incident Type:</strong> {formattedIncidentType}</div>
-            <div><strong>Route:</strong> {complaint.route}</div>
-            <div><strong>Incident Date:</strong> {formattedIncidentDate}</div>
-            <div><strong>Incident Time:</strong> {complaint.incidentTime}</div>
-            <div><strong>Submitted Date:</strong> {formattedSubmittedDate}</div>
-            <div className="flex items-center gap-2">
-              <strong>Status:</strong>
-              <Badge variant={'outline'} className={"border-transparent " + currentStatusConfig.color}>
-                {currentStatusConfig.icon}
-                {complaint.status}
-              </Badge>
+            <div>
+              <strong>Description:</strong>
+              <p>{complaint.description}</p>
             </div>
-          </div>
-          <div>
-            <strong>Description:</strong>
-            <p>{complaint.description}</p>
-          </div>
-          <div>
-            <strong>Incident Photos:</strong>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {complaint.incidentPhotoUrls && complaint.incidentPhotoUrls.length > 0 ? (
-                complaint.incidentPhotoUrls.map((url, index) => (
-                  <img
-                    key={index}
-                    src={url}
-                    alt={`Incident photo ${index + 1}`}
-                    className="w-24 h-24 object-cover rounded-md cursor-pointer transition-transform hover:scale-105"
-                    onClick={() => openImageViewer(url)}
-                  />
-                ))
-              ) : (
-                <p className="text-muted-foreground">No photos provided.</p>
-              )}
+            <div>
+              <strong>Incident Photos:</strong>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {complaint.incidentPhotoUrls && complaint.incidentPhotoUrls.length > 0 ? (
+                  complaint.incidentPhotoUrls.map((url, index) => (
+                    <img
+                      key={index}
+                      src={url}
+                      alt={`Incident photo ${index + 1}`}
+                      className="w-24 h-24 object-cover rounded-md cursor-pointer transition-transform hover:scale-105"
+                      onClick={() => openImageViewer(url)}
+                    />
+                  ))
+                ) : (
+                  <p className="text-muted-foreground">No photos provided.</p>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="status"><strong>Update Status:</strong></label>
-            <Select value={status} onValueChange={(value) => setStatus(value as Complaint['status'])}>
-              <SelectTrigger id="status" className="w-[200px]">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="New">New</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Under Investigation">Under Investigation</SelectItem>
-                <SelectItem value="Resolved">Resolved</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="resolution-notes"><strong>Resolution Notes:</strong></label>
-            <Textarea
-              id="resolution-notes"
-              value={resolutionNotes}
-              onChange={(e) => setResolutionNotes(e.target.value)}
-              placeholder="Enter resolution notes..."
-              rows={5}
-            />
-          </div>
-          <Button onClick={handleSave}>Save Changes</Button>
-        </CardContent>
-      </Card>
-      {selectedImage && (
-        <ImageViewDialog
-          isOpen={isImageViewerOpen}
-          onOpenChange={setImageViewerOpen}
-          imageUrl={selectedImage}
-          title="Incident Photo"
-        />
-      )}
+            <div className="space-y-2">
+              <label htmlFor="status"><strong>Update Status:</strong></label>
+              <Select value={status} onValueChange={(value) => setStatus(value as Complaint['status'])}>
+                <SelectTrigger id="status" className="w-[200px]">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="New">New</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Under Investigation">Under Investigation</SelectItem>
+                  <SelectItem value="Resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="resolution-notes"><strong>Resolution Notes:</strong></label>
+              <Textarea
+                id="resolution-notes"
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                placeholder="Enter resolution notes..."
+                rows={5}
+              />
+            </div>
+            <Button onClick={handleSave}>Save Changes</Button>
+          </CardContent>
+        </Card>
+        {selectedImage && (
+          <ImageViewDialog
+            isOpen={isImageViewerOpen}
+            onOpenChange={setImageViewerOpen}
+            imageUrl={selectedImage}
+            title="Incident Photo"
+          />
+        )}
+      </main>
     </div>
   );
 }

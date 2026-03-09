@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { UserCircle, LogOut, ArrowLeft, AlertTriangle } from "lucide-react";
+import { AdminHeader } from "@/components/admin-header";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -142,10 +143,7 @@ export default function ViolatorsPage() {
     return () => unsubscribe();
   }, [currentUser, userData]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/');
-  };
+  // Data processing for violators analysis
 
   // Filter complaints by date range
   const filteredByDateComplaints = useMemo(() => {
@@ -230,38 +228,7 @@ export default function ViolatorsPage() {
               </h1>
               <span className="ml-4 text-sm font-medium text-muted-foreground">Top Violators</span>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={userData.profilePictureUrl} alt="@user" />
-                    <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{`${userData.firstName} ${userData.lastName}`}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userData.office === 'PSO' ? 'Public Safety Office' : 'Super Administrator'}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AdminHeader userData={userData} />
           </div>
         </div>
       </header>

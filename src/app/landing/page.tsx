@@ -10,7 +10,8 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PassengersMapLogo } from "@/components/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { UserCircle, LogOut, ArrowRight, BarChart3 } from "lucide-react";
+import { AdminHeader } from "@/components/admin-header";
+import { ArrowRight, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
 interface UserData {
@@ -45,10 +46,7 @@ export default function LandingPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/');
-  };
+  // Landing page logic
 
   const handleProceedToDashboard = () => {
     router.push('/dashboard');
@@ -74,38 +72,7 @@ export default function LandingPage() {
                 <span className="text-blue-500"> Map</span>
               </h1>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={userData.profilePictureUrl} alt="@user" />
-                    <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{`${userData.firstName} ${userData.lastName} (${userData.office})`}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userData.office === 'PSO' ? 'Public Safety Office' : 'Super Administrator'}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                    <UserCircle className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {userData && <AdminHeader userData={userData} />}
           </div>
         </div>
       </header>
@@ -192,9 +159,11 @@ export default function LandingPage() {
                 <Button
                   variant="outline"
                   className="flex-1"
-                  onClick={handleLogout}
+                  asChild
                 >
-                  Logout
+                  <Link href="/landing">
+                    Refresh
+                  </Link>
                 </Button>
               </div>
             </div>
