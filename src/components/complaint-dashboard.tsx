@@ -273,7 +273,7 @@ export function ComplaintDashboard() {
                 variant={activeSection === item.id ? "default" : "ghost"}
                 className={`
                   w-full justify-start transition-all duration-200 h-9 lg:h-10
-                  ${!isSidebarOpen ? 'px-2 lg:px-0' : 'px-2 lg:px-3'}
+                  ${!isSidebarOpen ? 'px-2 lg:px-2 justify-center' : 'px-2 lg:px-3 justify-start'}
                 `}
                 onClick={() => {
                   setActiveSection(item.id);
