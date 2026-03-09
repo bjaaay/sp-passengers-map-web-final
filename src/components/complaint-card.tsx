@@ -42,6 +42,17 @@ const statusConfig: Record<string, { icon: React.ReactNode; color: string; borde
     Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300', borderColor: 'border-gray-200 dark:border-gray-800' },
 }
 
+const formatVehicleType = (vehicleType: string): string => {
+  const vehicleTypeMap: Record<string, string> = {
+    'jeepney': 'Jeepney',
+    'tricycle': 'Tricycle',
+    'e-trike': 'E-Trike',
+    'modern-puv': 'Modern PUV',
+    'uv-express': 'UV Express'
+  };
+  return vehicleTypeMap[vehicleType.toLowerCase().replace(/ /g, '-')] || vehicleType.replace(/\b\w/g, l => l.toUpperCase());
+};
+
 export function ComplaintCard({ complaint, onStatusChange, onDelete }: ComplaintCardProps) {
   const { toast } = useToast();
   const [resolutionNotes, setResolutionNotes] = useState(complaint.resolutionNotes || '');
@@ -49,6 +60,7 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
   const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
   const statusLabel = complaint.status || 'Unknown';
   const vehicleIcon = vehicleIcons[complaint.vehicleType.toLowerCase().replace(/ /g, '-')] || <HelpCircle className="h-5 w-5" />;
+  const formattedVehicleType = formatVehicleType(complaint.vehicleType);
   const thumbnailUrl = complaint.incidentPhotoUrls && complaint.incidentPhotoUrls.length > 0 ? complaint.incidentPhotoUrls[0] : null;
   const viewUrl = `/dashboard/complaint?id=${complaint.id}`;
 
@@ -117,7 +129,7 @@ export function ComplaintCard({ complaint, onStatusChange, onDelete }: Complaint
           <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               {vehicleIcon}
-              <span>{complaint.vehicleType}</span>
+              <span>{formattedVehicleType}</span>
             </div>
             <div>
               <p className="line-clamp-2">{complaint.description}</p>

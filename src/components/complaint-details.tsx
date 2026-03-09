@@ -14,7 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImageViewDialog } from '@/components/image-view-dialog';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Hourglass, ShieldQuestion, CheckCircle2, HelpCircle } from 'lucide-react';
+import { JeepneyIcon } from './jeepney-icon';
+import { TricycleIcon } from './tricycle-icon';
+import { ETrikeIcon } from './e-trike-icon';
+import { ModernPuvIcon } from './modern-puv-icon';
+import { UvExpressIcon } from './uv-express-icon';
+import { format, isValid, parse } from 'date-fns';
 
 export default function ComplaintDetails() {
   const searchParams = useSearchParams();
@@ -26,6 +32,45 @@ export default function ComplaintDetails() {
   const { userData } = useCurrentUser();
   const [isImageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const statusConfig: Record<string, { icon: React.ReactNode; color: string; }> = {
+    New: { icon: <AlertCircle className="mr-1.5 h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' },
+    Pending: { icon: <Hourglass className="mr-1.5 h-4 w-4" />, color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300' },
+    'Under Investigation': { icon: <ShieldQuestion className="mr-1.5 h-4 w-4" />, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' },
+    Resolved: { icon: <CheckCircle2 className="mr-1.5 h-4 w-4" />, color: 'bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300' },
+    Unknown: { icon: <HelpCircle className="mr-1.5 h-4 w-4" />, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300' },
+  };
+
+  const vehicleIcons: Record<string, React.ReactNode> = {
+    jeepney: <JeepneyIcon className="h-5 w-5" />,
+    tricycle: <TricycleIcon className="h-5 w-5" />,
+    'e-trike': <ETrikeIcon className="h-5 w-5" />,
+    'modern-puv': <ModernPuvIcon className="h-5 w-5" />,
+    'uv-express': <UvExpressIcon className="h-5 w-5" />,
+  };
+
+  const formatIncidentType = (incidentType: string): string => {
+    const incidentTypeMap: Record<string, string> = {
+      'driver_attitude': 'Driver Attitude',
+      'vehicle_overload': 'Vehicle Overload',
+      'fare_overcharging': 'Fare Overcharging',
+      'harassment': 'Harassment',
+      'reckless_driving': 'Reckless Driving',
+      'other': 'Others'
+    };
+    return incidentTypeMap[incidentType] || incidentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const formatVehicleType = (vehicleType: string): string => {
+    const vehicleTypeMap: Record<string, string> = {
+      'jeepney': 'Jeepney',
+      'tricycle': 'Tricycle',
+      'e-trike': 'E-Trike',
+      'modern-puv': 'Modern PUV',
+      'uv-express': 'UV Express'
+    };
+    return vehicleTypeMap[vehicleType.toLowerCase().replace(/ /g, '-')] || vehicleType.replace(/\b\w/g, l => l.toUpperCase());
+  };
 
   useEffect(() => {
     if (!complaintId) return;
@@ -71,6 +116,24 @@ export default function ComplaintDetails() {
     return () => unsubscribe();
   }, [complaintId, toast]);
 
+  const formatSubmittedDate = (dateString: string): string => {
+    if (!dateString || dateString === 'No Date') return 'Not available';
+    
+    try {
+      const dateObj = new Date(dateString);
+      if (isValid(dateObj)) {
+        return format(dateObj, "MMM dd, yyyy");
+      } else {
+        const parsedDate = parse(dateString, "M/d/yyyy", new Date());
+        if (isValid(parsedDate)) {
+          return format(parsedDate, "MMM dd, yyyy");
+        }
+      }
+    } catch (e) {}
+    
+    return dateString;
+  };
+
   const handleSave = () => {
     if (!complaint || !userData) return;
 
@@ -111,6 +174,13 @@ export default function ComplaintDetails() {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 
+  const currentStatusConfig = statusConfig[complaint.status] || statusConfig.Unknown;
+  const vehicleIcon = vehicleIcons[complaint.vehicleType.toLowerCase().replace(/ /g, '-')] || <HelpCircle className="h-5 w-5" />;
+  const formattedSubmittedDate = formatSubmittedDate(complaint.submittedDate);
+  const formattedIncidentType = formatIncidentType(complaint.incidentType);
+  const formattedVehicleType = formatVehicleType(complaint.vehicleType);
+  const formattedIncidentDate = formatSubmittedDate(complaint.incidentDate);
+
   return (
     <div className="container mx-auto p-4">
         <div className="mb-4">
@@ -128,15 +198,24 @@ export default function ComplaintDetails() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><strong>License Plate:</strong> {complaint.licensePlate}</div>
-            <div><strong>Vehicle Type:</strong> {complaint.vehicleType}</div>
-            <div><strong>Incident Type:</strong> {complaint.incidentType}</div>
+            <div className="flex items-center gap-2">
+              <strong>Vehicle Type:</strong>
+              <div className="flex items-center gap-1">
+                {vehicleIcon}
+                <span>{formattedVehicleType}</span>
+              </div>
+            </div>
+            <div><strong>Incident Type:</strong> {formattedIncidentType}</div>
             <div><strong>Route:</strong> {complaint.route}</div>
-            <div><strong>Incident Date:</strong> {complaint.incidentDate}</div>
+            <div><strong>Incident Date:</strong> {formattedIncidentDate}</div>
             <div><strong>Incident Time:</strong> {complaint.incidentTime}</div>
-            <div><strong>Submitted Date:</strong> {complaint.submittedDate}</div>
-            <div>
+            <div><strong>Submitted Date:</strong> {formattedSubmittedDate}</div>
+            <div className="flex items-center gap-2">
               <strong>Status:</strong>
-              <Badge>{complaint.status}</Badge>
+              <Badge variant={'outline'} className={"border-transparent " + currentStatusConfig.color}>
+                {currentStatusConfig.icon}
+                {complaint.status}
+              </Badge>
             </div>
           </div>
           <div>
@@ -164,7 +243,7 @@ export default function ComplaintDetails() {
           <div className="space-y-2">
             <label htmlFor="status"><strong>Update Status:</strong></label>
             <Select value={status} onValueChange={(value) => setStatus(value as Complaint['status'])}>
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="w-[200px]">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
