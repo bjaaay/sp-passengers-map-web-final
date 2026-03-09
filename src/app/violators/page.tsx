@@ -150,10 +150,42 @@ export default function ViolatorsPage() {
     const { start, end } = getDateRange(filterType);
     return complaints.filter(complaint => {
       try {
-        const complaintDate = new Date(complaint.incidentDate);
+        // Try multiple date formats
+        let complaintDate: Date | null = null;
+        
+        if (complaint.incidentDate && complaint.incidentDate !== 'No Date') {
+          // Try parsing as ISO date first
+          complaintDate = new Date(complaint.incidentDate);
+          
+          // If invalid, try parsing as M/d/yyyy format
+          if (isNaN(complaintDate.getTime())) {
+            const parts = complaint.incidentDate.split('/');
+            if (parts.length === 3) {
+              complaintDate = new Date(
+                parseInt(parts[2]), // year
+                parseInt(parts[0]) - 1, // month (0-indexed)
+                parseInt(parts[1]) // day
+              );
+            }
+          }
+        }
+        
+        // If still invalid, use submitted date as fallback
+        if (!complaintDate || isNaN(complaintDate.getTime())) {
+          if (complaint.submittedDate && complaint.submittedDate !== 'No Date') {
+            complaintDate = new Date(complaint.submittedDate);
+          }
+        }
+        
+        // If still no valid date, include the complaint (don't filter it out)
+        if (!complaintDate || isNaN(complaintDate.getTime())) {
+          return true;
+        }
+        
         return complaintDate >= start && complaintDate <= end;
-      } catch {
-        return false;
+      } catch (error) {
+        console.warn('Date parsing error for complaint:', complaint.incidentDate, error);
+        return true; // Include complaints with date parsing errors
       }
     });
   }, [complaints, filterType]);
@@ -261,7 +293,9 @@ export default function ViolatorsPage() {
               </Select>
             </div>
             <div className="text-sm text-muted-foreground mt-6 sm:mt-2">
-              Showing {violators.length} violators with {filteredByDateComplaints.length} total complaints
+              <div>Showing {violators.length} violators with {filteredByDateComplaints.length} total complaints</div>
+              <div className="text-xs">Total complaints loaded: {complaints.length}</div>
+              <div className="text-xs">User municipality: {userData?.municipality || 'Not set'}</div>
             </div>
           </div>
         </Card>
@@ -273,45 +307,37 @@ export default function ViolatorsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">Rank</TableHead>
-                    <TableHead>License Plate</TableHead>
-                    <TableHead>Vehicle Type</TableHead>
-                    <TableHead className="text-center">Complaints</TableHead>
-                    <TableHead>Severity</TableHead>
-                    <TableHead>Routes</TableHead>
-                    <TableHead>Latest Incident</TableHead>
+                    <TableHead className="w-12 text-xs sm:text-sm">Rank</TableHead>
+                    <TableHead className="text-xs sm:text-sm">License Plate</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Vehicle Type</TableHead>
+                    <TableHead className="text-center text-xs sm:text-sm">Complaints</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Severity</TableHead>
+                    <TableHead className="hidden md:table-cell text-xs sm:text-sm">Routes</TableHead>
+                    <TableHead className="hidden lg:table-cell text-xs sm:text-sm">Latest Incident</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {violators.map((violator, index) => (
                     <TableRow key={violator.licensePlate}>
-                      <TableCell className="font-semibold">#{index + 1}</TableCell>
-                      <TableCell className="font-mono font-bold text-lg">{violator.licensePlate}</TableCell>
+                      <TableCell className="font-semibold text-xs sm:text-sm">#{index + 1}</TableCell>
+                      <TableCell className="font-mono font-bold text-sm sm:text-lg">{violator.licensePlate}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{violator.vehicleType}</Badge>
+                        <Badge variant="outline" className="text-xs">{violator.vehicleType}</Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="font-bold text-lg text-red-600">{violator.complaintCount}</span>
+                        <span className="font-bold text-sm sm:text-lg text-red-600">{violator.complaintCount}</span>
                       </TableCell>
                       <TableCell>
                         {getSeverityBadge(violator.complaintCount)}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1 max-w-xs">
-                          {violator.routes.slice(0, 2).map(route => (
-                            <span key={route} className="text-xs bg-muted px-2 py-1 rounded truncate">
-                              {route}
-                            </span>
-                          ))}
-                          {violator.routes.length > 2 && (
-                            <span className="text-xs text-muted-foreground">
-                              +{violator.routes.length - 2} more
-                            </span>
-                          )}
+                      <TableCell className="hidden md:table-cell">
+                        <div className="max-w-32 truncate text-xs">
+                          {violator.routes.slice(0, 2).join(', ')}
+                          {violator.routes.length > 2 && '...'}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(violator.mostRecentIncident).toLocaleDateString()}
+                      <TableCell className="hidden lg:table-cell text-xs">
+                        {violator.mostRecentIncident}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -319,25 +345,13 @@ export default function ViolatorsPage() {
               </Table>
             </div>
           </Card>
-        ) : (
+                        ) : (
           <Card className="p-12 text-center">
             <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Violators Found</h3>
-            <p className="text-sm text-muted-foreground">
-              There are no public utility vehicle violations recorded for the selected period.
-            </p>
+            <p className="text-muted-foreground">No violations were found in the selected time period.</p>
           </Card>
         )}
-
-        {/* Navigation Buttons */}
-        <div className="flex gap-3 mt-8 mb-8">
-          <Button asChild className="flex-1">
-            <Link href="/landing">Return to Landing</Link>
-          </Button>
-          <Button asChild variant="outline" className="flex-1">
-            <Link href="/dashboard">Go to Dashboard</Link>
-          </Button>
-        </div>
       </main>
     </div>
   );

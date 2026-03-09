@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Shield shape -->
+  <path d="M16 4 L8 8 L8 16 C8 22 16 26 16 26 C16 26 24 22 24 16 L24 8 L16 4Z" fill="#ffffff" stroke="#1e40af" stroke-width="1"/>
+  
+  <!-- Admin symbol (checkmark in shield) -->
+  <path d="M11 16 L14 19 L21 12" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Small dot to indicate admin status -->
+  <circle cx="24" cy="8" r="3" fill="#10b981" stroke="#ffffff" stroke-width="1"/>
+</svg>

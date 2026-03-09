@@ -222,26 +222,27 @@ export function ComplaintDashboard() {
       
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-background border-r transform transition-transform duration-200 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        ${!isSidebarOpen ? 'lg:w-16' : ''}
+        fixed lg:static inset-y-0 left-0 z-50 bg-background border-r transform transition-all duration-300 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
+        lg:translate-x-0
+        ${!isSidebarOpen ? 'lg:w-16' : 'lg:w-64'}
       `}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-3 lg:p-4 border-b">
             {!isSidebarOpen && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="hidden lg:flex"
+                className="hidden lg:flex mx-auto"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             )}
             {isSidebarOpen && (
               <>
-                <h2 className="text-lg font-semibold">Dashboard</h2>
+                <h2 className="text-sm lg:text-lg font-semibold hidden lg:block">Dashboard</h2>
                 <div className="flex gap-1">
                   <Button
                     variant="ghost"
@@ -265,23 +266,27 @@ export function ComplaintDashboard() {
           </div>
           
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-2 lg:p-4 space-y-1 lg:space-y-2">
             {navigationItems.map((item) => (
               <Button
                 key={item.id}
                 variant={activeSection === item.id ? "default" : "ghost"}
                 className={`
-                  w-full justify-start transition-all duration-200
-                  ${!isSidebarOpen ? 'px-2 lg:px-0' : ''}
+                  w-full justify-start transition-all duration-200 h-9 lg:h-10
+                  ${!isSidebarOpen ? 'px-2 lg:px-0' : 'px-2 lg:px-3'}
                 `}
                 onClick={() => {
                   setActiveSection(item.id);
-                  setIsSidebarOpen(false);
+                  if (window.innerWidth < 1024) {
+                    setIsSidebarOpen(false);
+                  }
                 }}
                 title={!isSidebarOpen ? item.label : undefined}
               >
-                <item.icon className="h-4 w-4" />
-                {isSidebarOpen && <span className="ml-2">{item.label}</span>}
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {isSidebarOpen && (
+                  <span className="ml-2 text-sm lg:text-base hidden lg:block">{item.label}</span>
+                )}
               </Button>
             ))}
           </nav>
@@ -372,7 +377,7 @@ export function ComplaintDashboard() {
                 </div>
               </div>
               
-              <div className="grid gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredComplaints.length > 0 ? (
                   filteredComplaints.map(complaint => (
                     <ComplaintCard
@@ -383,7 +388,7 @@ export function ComplaintDashboard() {
                     />
                   ))
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
                     No complaints found matching your criteria.
                   </div>
                 )}

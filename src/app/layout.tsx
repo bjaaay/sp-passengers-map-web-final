@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   title: 'Passengers Map',
   description: 'A Smart Mobile Application for Real-Time Public Transportation Tracking',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 };
 
