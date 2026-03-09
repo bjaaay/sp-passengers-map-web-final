@@ -19,7 +19,7 @@ import { MapsProvider } from "./maps-provider.tsx";
 
 const formSchema = z.object({
   terminalName: z.string().min(1, { message: "Terminal name is required." }),
-  address: z.string().optional(),
+  address: z.string().min(1, { message: "Address is required." }),
   latitude: z.number({ required_error: "Latitude is required." }),
   longitude: z.number({ required_error: "Longitude is required." }),
   imageUrl: z.string().min(1, { message: "An image is required." }),
@@ -125,7 +125,7 @@ export function TerminalForm() {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address (Optional)</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter terminal address" {...field} />
                   </FormControl>
