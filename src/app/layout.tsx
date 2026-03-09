@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/toaster"
 export const metadata: Metadata = {
   title: 'Passengers Map',
   description: 'A Smart Mobile Application for Real-Time Public Transportation Tracking',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

@@ -9,7 +9,7 @@ import { VehicleList } from "./vehicle-list";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { UserCircle, LogOut, Search, Inbox } from "lucide-react";
+import { UserCircle, LogOut, Search, Inbox, ChevronDown, Shield } from "lucide-react";
 import Link from "next/link";
 import { signOut, User } from "firebase/auth";
 import { auth, database } from "@/lib/firebase";
@@ -218,30 +218,25 @@ export function ComplaintDashboard() {
             </div>
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
+                <Button variant="ghost" className="h-auto p-2 flex items-center gap-3 hover:bg-accent">
+                  <Avatar className="h-9 w-9">
                     <AvatarImage src={userData.profilePictureUrl} alt="@user" />
-                    <AvatarFallback>{userData.firstName?.[0]}</AvatarFallback>
+                    <AvatarFallback className="text-sm font-medium">{userData.firstName?.[0]}</AvatarFallback>
                   </Avatar>
+                  <div className="flex flex-col items-start">
+                    <p className="text-sm font-medium">{userData.firstName} {userData.lastName}</p>
+                    <p className="text-xs text-muted-foreground">{userData.office === 'PSO' ? 'Public Safety Office' : 'Super Administrator'}</p>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{`${userData.firstName} ${userData.lastName} (${userData.office})`}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {userData.office === 'PSO' ? 'Public Safety Office' : 'Super Administrator'}
-                        </p>
-                      </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                 <DropdownMenuItem asChild>
+              <DropdownMenuContent align="end" forceMount>
+                <DropdownMenuItem asChild>
                   <Link href="/profile">
                     <UserCircle className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
