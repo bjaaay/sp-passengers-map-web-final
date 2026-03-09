@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImageViewDialog } from '@/components/image-view-dialog';
 import { ArrowLeft } from 'lucide-react';
@@ -22,6 +23,7 @@ export default function ComplaintDetails() {
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [status, setStatus] = useState<Complaint['status']>('New');
   const { toast } = useToast();
+  const { userData } = useCurrentUser();
   const [isImageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -70,7 +72,7 @@ export default function ComplaintDetails() {
   }, [complaintId, toast]);
 
   const handleSave = () => {
-    if (!complaint) return;
+    if (!complaint || !userData) return;
 
     const reportRef = ref(database, `reports/${complaint.userId}/${complaint.id}`);
     const webNotifsRef = ref(database, `webNotifications/${complaint.userId}`);
@@ -86,6 +88,7 @@ export default function ComplaintDetails() {
           resolutionNotes: resolutionNotes,
           timestamp: new Date().toISOString(),
           read: false,
+          sender: userData.municipality ? `PSO - ${userData.municipality}` : userData.office || 'PSO',
         };
 
         // Push the notification to the user's web notifs list
