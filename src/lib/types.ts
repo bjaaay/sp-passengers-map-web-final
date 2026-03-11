@@ -16,6 +16,7 @@ export type Complaint = {
 };
 
 export type Vehicle = {
+  userId: string;
   plateNumber: string;
   vehicleType: string;
   gpsTrackerId: string;

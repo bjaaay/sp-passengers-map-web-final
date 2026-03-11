@@ -134,7 +134,7 @@ export function RegisterVehicleForm() {
   return (
     <div className="flex flex-col h-full">
       <main className="flex-1 bg-card p-6 rounded-lg shadow-md">
-        {!form.formState.isSubmitSuccessful && (
+        {!form.formState.isSubmitSuccessful && Object.keys(form.formState.errors).length > 0 && (
            <p className="text-sm text-red-500 mb-4">*All fields are required for verification*</p>
         )}
 
