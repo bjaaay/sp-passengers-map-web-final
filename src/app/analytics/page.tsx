@@ -106,7 +106,6 @@ export default function AnalyticsPage() {
     const reportsRef = ref(database, 'reports');
     const unsubscribe = onValue(reportsRef, (snapshot) => {
       const allReports = snapshot.val();
-      console.log('Raw Firebase Data:', allReports); // Debug log
       if (allReports) {
         const loadedComplaints: Complaint[] = [];
         let skippedCount = 0;
@@ -196,21 +195,8 @@ export default function AnalyticsPage() {
             });
           });
         });
-        console.log('Loaded Complaints:', loadedComplaints); // Debug log
-        console.log('Admin municipality:', userData.municipality);
-        console.log('Skipped reports count (municipality mismatch):', skippedCount);
-        console.log('Skipped samples (showing route, report.municipality, parsedMunicipalities):', skippedSamples.map(s => ({
-          reportId: s.reportId,
-          userId: s.userId,
-          route: s.reportData.route,
-          reportMunicipality: s.reportData.municipality,
-          parsedMunicipalities: getMunicipalitiesFromRoute(s.reportData.route),
-        })));
-        setComplaints(loadedComplaints);
-        console.log('Loaded Complaints:', loadedComplaints); // Debug log
         setComplaints(loadedComplaints);
       } else {
-        console.log('No reports found in database'); // Debug log
         setComplaints([]);
       }
       setIsLoading(false);
@@ -462,339 +448,339 @@ export default function AnalyticsPage() {
         <Card className="p-6 mb-8">
           <h2 className="text-2xl font-bold mb-2">Total Complaints</h2>
           <p className="text-5xl font-bold text-blue-600">{complaints.length}</p>
-          {complaints.length === 0 && (
-            <p className="text-sm text-amber-600 mt-4 font-semibold">
-              ⚠️ No complaints found. Check browser console (F12) for debug information, or wait for a mobile user to submit a report.
-            </p>
-          )}
         </Card>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {complaints.length === 0 && (
-            <Card className="col-span-1 lg:col-span-2 p-6 border-amber-200 bg-amber-50">
-              <h3 className="text-lg font-semibold mb-4 text-amber-900">Debugging Information</h3>
-              <div className="space-y-3 text-sm text-amber-800">
-                <p><strong>Current Status:</strong> No complaint data available</p>
-                <p><strong>What to check:</strong></p>
-                <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>Open browser Developer Tools (Press <kbd className="bg-white px-2 py-1 rounded">F12</kbd>)</li>
-                  <li>Go to the <strong>Console</strong> tab</li>
-                  <li>Look for "Raw Firebase Data" log to see if data exists in the database</li>
-                  <li>Check that reports are stored in the format: <code className="bg-white px-1 rounded text-xs">reports → userId → reportId → {'{date, time, ...}'}</code></li>
-                  <li>Ensure your user's municipality matches routes in the complaints</li>
-                  <li>If no data appears, ask a mobile user to submit a complaint report</li>
-                </ul>
-                <p className="mt-4 text-amber-700"><strong>Expected Data Fields:</strong> date, time, vehicleType, incidentType, plate, route, description</p>
-              </div>
-            </Card>
-          )}
-          
-          {/* Reports Over Time - Line Chart */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Reports Over Time (Last 30 Days)</h3>
-            {reportsOverTime.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={reportsOverTime}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="reports" 
-                    stroke="#3b82f6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3b82f6', r: 4 }}
-                    name="Reports"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
-              </div>
-            )}
-          </Card>
-
-          {/* Status Distribution - Pie Chart */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Complaints by Status</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => value > 0 ? `${name}: ${value}` : ''}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Most Common Violations */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Most Common Violation Types</h3>
-            {violationTypeDetails.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart 
-                  data={violationTypeDetails.slice(0, 6)}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 200 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="type" type="category" width={190} tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#10b981" name="Reports" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
-              </div>
-            )}
-          </Card>
-
-          {/* Incident Type Distribution - Bar Chart */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Complaints by Incident Type</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={incidentTypeData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Peak Reporting Hours */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Peak Reporting Hours</h3>
-            {peakByHour.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={peakByHour}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="reports" fill="#f59e0b" name="Reports" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No time data available
-              </div>
-            )}
-          </Card>
-
-          {/* Peak Reporting Days */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Reports by Day of Week</h3>
-            {peakByDayOfWeek.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={peakByDayOfWeek}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="reports" fill="#8b5cf6" name="Reports" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No data available
-              </div>
-            )}
-          </Card>
-
-          {/* Vehicle Type Distribution - Pie Chart */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Complaints by Vehicle Type</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={vehicleTypeData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {vehicleTypeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Statistics Summary */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Statistics Summary</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-                <span className="font-medium">Total Complaints</span>
-                <span className="text-2xl font-bold text-blue-600">{complaints.length}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-                <span className="font-medium">Resolved</span>
-                <span className="text-2xl font-bold text-green-600">{complaints.filter(c => c.status === 'Resolved').length}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-orange-50 rounded">
-                <span className="font-medium">Under Investigation</span>
-                <span className="text-2xl font-bold text-orange-600">{complaints.filter(c => c.status === 'Under Investigation').length}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-red-50 rounded">
-                <span className="font-medium">New</span>
-                <span className="text-2xl font-bold text-red-600">{complaints.filter(c => c.status === 'New').length}</span>
-              </div>
-            </div>
-          </Card>
-
-          {/* Trend Insights */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Trend Insights</h3>
-            <div className="space-y-4">
-              <div className="p-3 bg-purple-50 rounded">
-                <p className="text-sm font-medium text-purple-900">Most Common Violation</p>
-                <p className="text-lg font-bold text-purple-600">
-                  {violationTypeDetails.length > 0 ? violationTypeDetails[0].type : 'N/A'}
-                </p>
-                <p className="text-xs text-purple-600 mt-1">
-                  {violationTypeDetails.length > 0 ? `${violationTypeDetails[0].count} reports (${violationTypeDetails[0].percentage}%)` : ''}
-                </p>
-              </div>
-              <div className="p-3 bg-indigo-50 rounded">
-                <p className="text-sm font-medium text-indigo-900">Peak Reporting Day</p>
-                <p className="text-lg font-bold text-indigo-600">
-                  {peakByDayOfWeek.length > 0 ? peakByDayOfWeek[0].day : 'N/A'}
-                </p>
-                <p className="text-xs text-indigo-600 mt-1">
-                  {peakByDayOfWeek.length > 0 ? `${peakByDayOfWeek[0].reports} reports` : ''}
-                </p>
-              </div>
-              <div className="p-3 bg-cyan-50 rounded">
-                <p className="text-sm font-medium text-cyan-900">Peak Reporting Hour</p>
-                <p className="text-lg font-bold text-cyan-600">
-                  {peakByHour.length > 0 ? peakByHour[0].hour : 'N/A'}
-                </p>
-                <p className="text-xs text-cyan-600 mt-1">
-                  {peakByHour.length > 0 ? `${peakByHour[0].reports} reports` : ''}
-                </p>
-              </div>
-            </div>
-          </Card>
-          
-          {/* Summary Generator */}
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Generate Summary</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4 items-center">
-              <div className="col-span-1 flex flex-wrap gap-2">
-                <Button className="whitespace-nowrap" onClick={() => { setSummaryPeriod('daily'); setCustomRange(null); }}>Daily</Button>
-                <Button className="whitespace-nowrap" onClick={() => { setSummaryPeriod('monthly'); setCustomRange(null); }}>Monthly</Button>
-                <Button className="whitespace-nowrap" onClick={() => { setSummaryPeriod('yearly'); setCustomRange(null); }}>Yearly</Button>
-                <Button className="whitespace-nowrap" variant="outline" onClick={() => { setSummaryPeriod(null); clearCustomRange(); }}>Clear</Button>
-              </div>
-
-              <div className="col-span-2 flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm">From</label>
-                  <input type="date" value={startInput} onChange={e => setStartInput(e.target.value)} className="input input-sm max-w-[160px]" />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <label className="text-sm">To</label>
-                  <input type="date" value={endInput} onChange={e => setEndInput(e.target.value)} className="input input-sm max-w-[160px]" />
-                </div>
-
-                <div className="flex items-center gap-2 ml-auto lg:ml-0">
-                  <Button className="whitespace-nowrap" onClick={() => {
-                    if (startInput && endInput) {
-                      setCustomRange({ start: startInput, end: endInput });
-                      setSummaryPeriod(null);
-                    }
-                  }}>Generate Custom</Button>
-                  <Button variant="ghost" onClick={() => clearCustomRange()}>Reset</Button>
-                </div>
-              </div>
-            </div>
-
-            {summary ? (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">Showing summary for <strong>{summary.period}</strong> — {summary.totalReports} reports</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium">Top Incidents</h4>
-                    <ul className="mt-2 space-y-2">
-                      {summary.topIncidents.map((it, idx) => (
-                        <li key={idx} className="flex justify-between">
-                          <span>{it.type}</span>
-                          <span className="font-semibold">{it.count}</span>
-                        </li>
-                      ))}
-                    </ul>
+        <div className="space-y-8">
+          {/* Overview Section */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 text-muted-foreground">Overview</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Reports Over Time - Line Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Reports Over Time (Last 30 Days)</h3>
+                {reportsOverTime.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={reportsOverTime}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        dataKey="reports" 
+                        stroke="#3b82f6" 
+                        strokeWidth={2}
+                        dot={{ fill: '#3b82f6', r: 4 }}
+                        name="Reports"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    No data available
                   </div>
-                  <div>
-                    <h4 className="font-medium">Top License Plates</h4>
-                    <ul className="mt-2 space-y-2">
-                      {summary.topPlates.map((p, idx) => (
-                        <li key={idx} className="flex justify-between">
-                          <span className="font-mono">{p.plate}</span>
-                          <span className="font-semibold">{p.count}</span>
-                        </li>
+                )}
+              </Card>
+
+              {/* Status Distribution - Pie Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Complaints by Status</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => value > 0 ? `${name}: ${value}` : ''}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
-                    </ul>
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Card>
+            </div>
+          </section>
+
+          {/* Violations Analysis Section */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 text-muted-foreground">Violations Analysis</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Most Common Violations */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Most Common Violation Types</h3>
+                {violationTypeDetails.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart 
+                      data={violationTypeDetails.slice(0, 6)}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 200 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="type" type="category" width={190} tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#10b981" name="Reports" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    No data available
+                  </div>
+                )}
+              </Card>
+
+              {/* Incident Type Distribution - Bar Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Complaints by Incident Type</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={incidentTypeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            </div>
+          </section>
+
+          {/* Peak Times Section */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 text-muted-foreground">Peak Reporting Times</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Peak Reporting Hours */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Peak Reporting Hours</h3>
+                {peakByHour.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={peakByHour}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hour" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="reports" fill="#f59e0b" name="Reports" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    No time data available
+                  </div>
+                )}
+              </Card>
+
+              {/* Peak Reporting Days */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Reports by Day of Week</h3>
+                {peakByDayOfWeek.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={peakByDayOfWeek}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="day" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="reports" fill="#8b5cf6" name="Reports" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    No data available
+                  </div>
+                )}
+              </Card>
+            </div>
+          </section>
+
+          {/* Vehicle Analysis Section */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 text-muted-foreground">Vehicle Analysis</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Vehicle Type Distribution - Pie Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Complaints by Vehicle Type</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={vehicleTypeData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {vehicleTypeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Card>
+
+              {/* Statistics Summary */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Statistics Summary</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                    <span className="font-medium">Total Complaints</span>
+                    <span className="text-2xl font-bold text-blue-600">{complaints.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                    <span className="font-medium">Resolved</span>
+                    <span className="text-2xl font-bold text-green-600">{complaints.filter(c => c.status === 'Resolved').length}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                    <span className="font-medium">Under Investigation</span>
+                    <span className="text-2xl font-bold text-orange-600">{complaints.filter(c => c.status === 'Under Investigation').length}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                    <span className="font-medium">New</span>
+                    <span className="text-2xl font-bold text-red-600">{complaints.filter(c => c.status === 'New').length}</span>
                   </div>
                 </div>
-                <div className="mt-4 flex gap-2">
-                  <Button onClick={() => exportSummaryCSV(summary)}>Export CSV</Button>
-                  <Button onClick={() => {
-                    // compute start/end from selected period or custom range and navigate to reports page
-                    let s: Date | null = null; let e: Date | null = null;
-                    if (customRange) {
-                      s = new Date(customRange.start);
-                      e = new Date(customRange.end);
-                    } else if (summaryPeriod) {
-                      const r = getDateRange(summaryPeriod as 'daily'|'monthly'|'yearly');
-                      s = r.start; e = r.end;
-                    }
-                    const fmt = (d: Date | null) => d ? d.toISOString().split('T')[0] : '';
-                    const sStr = fmt(s); const eStr = fmt(e);
-                    const url = `/analytics/reports${sStr && eStr ? `?start=${sStr}&end=${eStr}` : ''}`;
-                    router.push(url);
-                  }}>Generate Reports</Button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Select a period to generate a summary.</p>
-            )}
-          </Card>
-        </div>
+              </Card>
+            </div>
+          </section>
 
-        {/* Navigation Buttons */}
-        <div className="flex gap-3 mt-8 mb-8">
-          <Button asChild className="flex-1">
-            <Link href="/landing">Return to Landing</Link>
-          </Button>
-          <Button asChild variant="outline" className="flex-1">
-            <Link href="/dashboard">Go to Dashboard</Link>
-          </Button>
+          {/* Insights Section */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 text-muted-foreground">Key Insights</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Trend Insights */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Trend Insights</h3>
+                <div className="space-y-4">
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <p className="text-sm font-medium text-purple-900">Most Common Violation</p>
+                    <p className="text-lg font-bold text-purple-600">
+                      {violationTypeDetails.length > 0 ? violationTypeDetails[0].type : 'N/A'}
+                    </p>
+                    <p className="text-xs text-purple-600 mt-1">
+                      {violationTypeDetails.length > 0 ? `${violationTypeDetails[0].count} reports (${violationTypeDetails[0].percentage}%)` : ''}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-indigo-50 rounded-lg">
+                    <p className="text-sm font-medium text-indigo-900">Peak Reporting Day</p>
+                    <p className="text-lg font-bold text-indigo-600">
+                      {peakByDayOfWeek.length > 0 ? peakByDayOfWeek[0].day : 'N/A'}
+                    </p>
+                    <p className="text-xs text-indigo-600 mt-1">
+                      {peakByDayOfWeek.length > 0 ? `${peakByDayOfWeek[0].reports} reports` : ''}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-cyan-50 rounded-lg">
+                    <p className="text-sm font-medium text-cyan-900">Peak Reporting Hour</p>
+                    <p className="text-lg font-bold text-cyan-600">
+                      {peakByHour.length > 0 ? peakByHour[0].hour : 'N/A'}
+                    </p>
+                    <p className="text-xs text-cyan-600 mt-1">
+                      {peakByHour.length > 0 ? `${peakByHour[0].reports} reports` : ''}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+              
+              {/* Summary Generator */}
+              <Card className="p-6 lg:col-span-2">
+                <h3 className="text-lg font-semibold mb-4">Generate Summary Report</h3>
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant={summaryPeriod === 'daily' ? 'default' : 'outline'} onClick={() => { setSummaryPeriod('daily'); setCustomRange(null); }}>Daily</Button>
+                    <Button variant={summaryPeriod === 'monthly' ? 'default' : 'outline'} onClick={() => { setSummaryPeriod('monthly'); setCustomRange(null); }}>Monthly</Button>
+                    <Button variant={summaryPeriod === 'yearly' ? 'default' : 'outline'} onClick={() => { setSummaryPeriod('yearly'); setCustomRange(null); }}>Yearly</Button>
+                    <Button variant="outline" onClick={() => { setSummaryPeriod(null); clearCustomRange(); }}>Clear</Button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium">From</label>
+                      <input 
+                        type="date" 
+                        value={startInput} 
+                        onChange={e => setStartInput(e.target.value)} 
+                        className="px-3 py-2 border rounded-md text-sm" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium">To</label>
+                      <input 
+                        type="date" 
+                        value={endInput} 
+                        onChange={e => setEndInput(e.target.value)} 
+                        className="px-3 py-2 border rounded-md text-sm" 
+                      />
+                    </div>
+                    <Button onClick={() => {
+                      if (startInput && endInput) {
+                        setCustomRange({ start: startInput, end: endInput });
+                        setSummaryPeriod(null);
+                      }
+                    }}>Custom Range</Button>
+                  </div>
+
+                  {summary ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">Showing summary for <strong>{summary.period}</strong> — {summary.totalReports} reports</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium mb-2">Top Incidents</h4>
+                          <ul className="space-y-1">
+                            {summary.topIncidents.map((it, idx) => (
+                              <li key={idx} className="flex justify-between text-sm">
+                                <span>{it.type}</span>
+                                <span className="font-semibold">{it.count}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-2">Top License Plates</h4>
+                          <ul className="space-y-1">
+                            {summary.topPlates.map((p, idx) => (
+                              <li key={idx} className="flex justify-between text-sm">
+                                <span className="font-mono">{p.plate}</span>
+                                <span className="font-semibold">{p.count}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={() => exportSummaryCSV(summary)}>Export CSV</Button>
+                        <Button variant="outline" onClick={() => {
+                          let s: Date | null = null; let e: Date | null = null;
+                          if (customRange) {
+                            s = new Date(customRange.start);
+                            e = new Date(customRange.end);
+                          } else if (summaryPeriod) {
+                            const r = getDateRange(summaryPeriod as 'daily'|'monthly'|'yearly');
+                            s = r.start; e = r.end;
+                          }
+                          const fmt = (d: Date | null) => d ? d.toISOString().split('T')[0] : '';
+                          const sStr = fmt(s); const eStr = fmt(e);
+                          const url = `/analytics/reports${sStr && eStr ? `?start=${sStr}&end=${eStr}` : ''}`;
+                          router.push(url);
+                        }}>Generate Reports</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Select a period to generate a summary.</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+          </section>
         </div>
       </main>
     </div>
