@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { Complaint } from "@/lib/types";
+import { municipalities } from "@/lib/municipalities";
 
 interface UserData {
   firstName: string;
@@ -35,7 +36,6 @@ interface ViolatorData {
 }
 
 function getMunicipalitiesFromRoute(route: string): string[] {
-  const municipalities = ["Abra", "Agusan del Norte", "Agusan del Sur", "Aklan", "Albay", "Antique", "Apayao", "Aurora", "Basilan", "Bataan", "Batangas", "Batanes", "Benguet", "Biliran", "Bohol", "Bukidnon", "Bulacan", "Calauan", "Camarines Norte", "Camarines Sur", "Camiguin", "Capiz", "Catanduanes", "Cavite", "Cebu", "Compostela Valley", "Cotabato", "Davao del Norte", "Davao del Sur", "Davao Oriental", "Dinagat Islands", "Eastern Samar", "Guimaras", "Ifugao", "Ilocos Norte", "Ilocos Sur", "Iloilo", "Isabela", "Kalinga", "Laguna", "Lanao del Norte", "Lanao del Sur", "La Union", "Leyte", "Maguindanao", "Marinduque", "Masbate", "Mindoro Occidental", "Mindoro Oriental", "Misamis Occidental", "Misamis Oriental", "Mountain Province", "Negros Occidental", "Negros Oriental", "Nueva Ecija", "Nueva Vizcaya", "Palawan", "Pampanga", "Pangasinan", "Quezon", "Quirino", "Rizal", "Romblon", "Samar", "Sarangani", "Siquijor", "Sorsogon", "South Cotabato", "Southern Leyte", "Sultan Kudarat", "Sulu", "Surigao del Norte", "Surigao del Sur", "Tarlac", "Tawi-Tawi", "Terminillo", "Ifugao", "Davao City", "Iloilo City", "Zamboanga City", "San Juan", "Mandaluyong", "Pasay", "Makati", "Manila", "Cebu City", "Davao City"];
   if (!route) return [];
   const lowerCaseRoute = route.toLowerCase();
   return municipalities.filter(muni => 
@@ -93,12 +93,15 @@ export default function ViolatorsPage() {
     if (!currentUser || !userData) return;
 
     const reportsRef = ref(database, 'reports');
+    
     const unsubscribe = onValue(reportsRef, (snapshot) => {
       const allReports = snapshot.val();
+      
       if (allReports) {
         const loadedComplaints: Complaint[] = [];
         Object.keys(allReports).forEach(userId => {
           const userReports = allReports[userId];
+          
           Object.keys(userReports).forEach(reportId => {
             const reportData = userReports[reportId];
             const route = reportData.route || '';
