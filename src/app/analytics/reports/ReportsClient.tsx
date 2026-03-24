@@ -116,7 +116,15 @@ export default function ReportsClient() {
             if (end && d > end) return;
           }
 
-          loaded.push({ id: reportId, userId, ...r });
+          // Calculate submitted date
+          let finalSubmittedDate = 'No Date';
+          if (r.timestamp) {
+            finalSubmittedDate = new Date(r.timestamp).toLocaleDateString();
+          } else if (r.date) {
+            finalSubmittedDate = r.date;
+          }
+
+          loaded.push({ id: reportId, userId, submittedDate: finalSubmittedDate, ...r });
         });
       });
       setReports(loaded);
